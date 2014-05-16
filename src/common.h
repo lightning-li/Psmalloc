@@ -32,7 +32,7 @@ static const size_t num_of_init_central = 4;
 
 // Size of four kinds of chunk in each thread
 static const size_t thread_small_chunk_size   = 64;         // 64  Bytes
-static const size_t thread_mediem_chunk_size  = 512;        // 512 Bytes
+static const size_t thread_medium_chunk_size  = 512;        // 512 Bytes
 static const size_t thread_big_chunk_size     = 1024*4;     // 4   KB
 static const size_t thread_huge_chunk_size    = 1024*32;    // 32  KB
 

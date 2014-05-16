@@ -7,13 +7,8 @@ void *do_heap_malloc(size_t size)
         void *ret = NULL;
         struct thread_cache_struct *current_thread = NULL;
 
-        // Check if global central has been initialized
-        if (init_done == 0) {
-                
-                current_thread = do_global_init();
-        } else {
-                current_thread = get_current_thread_cache(tkey);
-        }
+        // Get thread cache for current thread
+        current_thread = get_current_thread_cache(tkey);
 
         //Get new chunk in current thread cache
         // Third argument zero, bytes in chunk will not be initialized
@@ -27,11 +22,8 @@ void *do_heap_calloc(size_t n, size_t size)
         void *ret = NULL;
         struct thread_cache_struct *current_thread = NULL;
 
-        // Check if global central has been initialized
-        if (init_done == 0)
-                current_thread = do_global_init();
-        else
-                current_thread = get_current_thread_cache(tkey);
+        // Get thread cache for current thread
+        current_thread = get_current_thread_cache(tkey);
 
         //Get new chunk in current thread cache
         // Third argument one, bytes in chunk will be initialized to zero
@@ -42,7 +34,8 @@ void *do_heap_calloc(size_t n, size_t size)
 void *do_heap_realloc(void *ptr, size_t size)
 {
         void *ret = NULL;
-        struct thread_cache_struct *current_thread = get_current_thread_cache();
+        // Get thread cache for current thread
+        current_thread = get_current_thread_cache(tkey);
 
         ret = chunk_realloc_hook(current_thread, ptr, size);
         return ret;

@@ -28,7 +28,7 @@ static const size_t max_critical_size         = 1024*128;  // 128 KB
 static const size_t central_cache_size        = 1024*1024; // 1 MB
 
 // The number of central caches when initialize
-static const size_t num_of_init_central_cache = 4;
+static const size_t num_of_init_central = 4;
 
 // Size of four kinds of chunk in each thread
 static const size_t thread_small_chunk_size   = 64;         // 64  Bytes
@@ -55,7 +55,6 @@ enum chunk_kind {
 struct central_cache_struct {
         size_t                       index;
         uintptr_t                    start;
-        uintptr_t                    end;
         struct thread_central_struct *tc;
         struct central_cache_struct  *next;
         struct central_cache_struct  *prev;
@@ -64,7 +63,6 @@ struct central_cache_struct {
 // Struct for thread cache
 // Each thread has a thread_cache_struct
 struct thread_cache_struct {
-        pthread_t                  tid;
         size_t                     alloc_count;
         central_cache_struct       *cc;
         thread_small_chunk_struct  *tsp;

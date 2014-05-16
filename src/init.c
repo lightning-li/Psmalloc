@@ -1,66 +1,71 @@
 #include "init.h"
 #include "alloc_hook.h"
-#include <pthread.h>
+#include "free.h"
 #include <unistd.h>
 
-struct thread_cache_struct *has_init()
+static void add_central_cache()
 {
-        struct central_cache_struct *cc = global_central_head;
-        struct thread_cache_struct  *tc = NULL;
-        pthread_t tid                   = pthread_self();
+        size_t index                       = last_central->index + 1;
+        size_t index_util                  = index + 3;
+        struct central_cache_struct *cc = NULL;
 
-        // Check if this process has been initialized
-        if (cc == NULL)
-                return NULL;
-
-        
-        // Check if this thread has been initialized
-        while (cc != NULL && (tc = cc->tc) != NULL) {
-                if (tid == tc->tid)
+        // Initialize first central cache
+        if (global_central_head == NULL) {
+                global_central_head = sbrk(sizeof(struct central_cache_struct));
+                cc = global_central_head;
+                cc->prev = NULL;
+        } else {
+                last_central->next = sbrk(sizeof(struct central_cache_struct));
+                cc = last_central->next;
+                cc->prev = last_central;
+        }
+        first_free_central = cc;
+                
+        // Initialize next three central caches
+        while(1) {
+                cc->index = index;
+                cc->tc    = NULL;
+                central_hook(cc);
+                if (index == index_util)
                         break;
-                else
-                        tc = NULL;
+                cc->next = sbrk(sizeof(struct central_cache_struct));
+                cc->next->prev = cc;
                 cc = cc->next;
         }
+        cc->next = NULL;
+        last_central = cc;
+}
+
+static struct thread_cache_struct *do_thread_init()
+{
+        
+}
+
+struct thread_cache_struct *do_global_init()
+{
+        struct thread_cache_struct *tc = NULL;
+
+        init_done = 1;
+        // Initialize four primary central
+        add_central_struct();
+
+        // Create thread key
+        pthread_key_create(&tkey, NULL);
+
+        // Initialize this thread cache
+        tc = do_thread_init();
         return tc;
 }
 
-struct thread_cache_struct *do_init()
+struct thread_cache_struct *get_current_thread_cache()
 {
-        struct central_cache_struct *cc = NULL;
-        pthread_t tid                   = pthread_self();
-        int index;
+        struct thread_cache_struct *tc = NULL;
 
-        /*
-          Process initialize
-        */
-        if (global_central_head == NULL) {
-                global_central_head = sbrk(sizeof(struct central_cache_struct));
-                global_central_head->prev = NULL;
-                cc = global_central_head;
-                
-                // Initialize four central caches
-                index = 0;
-                while(1) {
-                        cc->index = index;
-                        cc->tc    = NULL;
-                        central_hook(cc);
-                        if (index == 3)
-                                break;
-                        cc->next = sbrk(sizeof(struct central_cache_struct));
-                        cc->next->prev = cc;
-                        cc = cc->next;
-                }
-                cc->next = NULL;
-                first_free_central = global_central_head;
-                last_central = cc;
-        }
+        tc = pthread_getspecific(tkey);
+        if (tc == NULL)
+                tc = do_thread_init();
 
-        /*
-          Thread initialize
-        */
-        // If there is no free central cache
-        if (first_free_central == NULL)
-                
-                
-        
+        return tc;
+}
+
+                        

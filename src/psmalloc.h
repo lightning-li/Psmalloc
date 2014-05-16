@@ -20,3 +20,5 @@ void ps_free(void *ptr) __THROW;
 void *ps_calloc(size_t n, size_t size) __THROW;
 
 void *ps_realloc(void *ptr, size_t size) __THROW;
+
+#endif

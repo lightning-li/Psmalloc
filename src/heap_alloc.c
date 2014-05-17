@@ -1,6 +1,6 @@
 #include "common.h"
 #include "heap_alloc.h"
-#include "init.h"
+#include "global_operation.h"
 
 void *do_heap_malloc(size_t size)
 {
@@ -8,13 +8,12 @@ void *do_heap_malloc(size_t size)
         struct thread_cache_struct *current_thread = NULL;
 
         // Get thread cache for current thread
-        current_thread = get_current_thread_cache(tkey);
+        current_thread = get_current_thread_cache();
 
         //Get new chunk in current thread cache
         // Third argument zero, bytes in chunk will not be initialized
         ret = chunk_hook(current_thread, size, 0);
         return ret;
-
 }
 
 void *do_heap_calloc(size_t n, size_t size)
@@ -23,7 +22,7 @@ void *do_heap_calloc(size_t n, size_t size)
         struct thread_cache_struct *current_thread = NULL;
 
         // Get thread cache for current thread
-        current_thread = get_current_thread_cache(tkey);
+        current_thread = get_current_thread_cache();
 
         //Get new chunk in current thread cache
         // Third argument one, bytes in chunk will be initialized to zero
@@ -35,7 +34,7 @@ void *do_heap_realloc(void *ptr, size_t size)
 {
         void *ret = NULL;
         // Get thread cache for current thread
-        current_thread = get_current_thread_cache(tkey);
+        current_thread = get_current_thread_cache();
 
         ret = chunk_realloc_hook(current_thread, ptr, size);
         return ret;

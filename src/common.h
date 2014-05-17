@@ -24,9 +24,12 @@
 // then use mmap
 static const size_t max_critical_size         = 1024*128;  // 128 KB
 
+// Size of slab for central and thread struct
+static const size_t central_slab_size = 1024*500;
+static const size_t thread_slab_size  = 1024*50;
+
 // Size of each central cache
 static const size_t central_cache_size        = 1024*1024; // 1 MB
-
 // The number of central caches when initialize
 static const size_t num_of_init_central = 4;
 
@@ -53,11 +56,13 @@ enum chunk_kind {
 // Struct for central cache
 // Size of each cache is thread_central_cache_size
 struct central_cache_struct {
-        size_t                       index;
         void                         *start;
-        struct thread_central_struct *tc;
+        enum chunk_kind              *free_ptr;
+        enum chunk_kind              *small_ptr;
+        enum chunk_kind              *medium_ptr;
+        enum chunk_kind              *big_ptr;
+        enum chunk_kind              *huge_ptr;
         struct central_cache_struct  *next;
-        struct central_cache_struct  *prev;
 };
 
 // Struct for thread cache
@@ -65,11 +70,7 @@ struct central_cache_struct {
 struct thread_cache_struct {
         size_t                      alloc_count;
         struct central_cache_struct *cc;
-        enum chunk_kind             *free_ptr;
-        enum chunk_kind             *small_ptr;
-        enum chunk_kind             *medium_ptr;
-        enum chunk_kind             *big_ptr;
-        enum chunk_kind             *huge_ptr;
+        struct thread_cache_struct  *next;
 };
 
 #endif

@@ -7,9 +7,11 @@ static void once_func(void)
 {
         // mutex initialize
         pthread_mutex_init(&mutex, NULL);
-        
+
+        pthread_mutex_lock(&mutex);
         // Global initialize
         do_global_init();
+        pthread_mutex_unlock(&mutex);
 }
 
 static void add_central_cache(void)

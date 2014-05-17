@@ -54,7 +54,7 @@ enum chunk_kind {
 // Size of each cache is thread_central_cache_size
 struct central_cache_struct {
         size_t                       index;
-        uintptr_t                    start;
+        void                         *start;
         struct thread_central_struct *tc;
         struct central_cache_struct  *next;
         struct central_cache_struct  *prev;
@@ -63,22 +63,13 @@ struct central_cache_struct {
 // Struct for thread cache
 // Each thread has a thread_cache_struct
 struct thread_cache_struct {
-        size_t                     alloc_count;
-        central_cache_struct       *cc;
-        thread_small_chunk_struct  *tsp;
-        thread_medium_chunk_struct *tmp;
-        thread_big_chunk_struct    *tbp;
-        thread_huge_chunk_struct   *thp;
+        size_t                      alloc_count;
+        struct central_cache_struct *cc;
+        enum chunk_kind             *free_ptr;
+        enum chunk_kind             *small_ptr;
+        enum chunk_kind             *medium_ptr;
+        enum chunk_kind             *big_ptr;
+        enum chunk_kind             *huge_ptr;
 };
-
-// Struct for thread chunk
-struct thread_chunk_struct {
-        enum chunk_kind            kind;
-        char                       available;
-        uintptr_t                  start;
-        uintptr_t                  end;
-        struct thread_cache_struct *tc;
-};
-
 
 #endif

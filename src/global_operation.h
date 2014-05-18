@@ -8,14 +8,14 @@
 /*
   variable
 */
-// Pointer to allocation central_cache_struct
-static struct central_cache_struct *central_slab = NULL;
-// Pointer to allocation central_cache_struct
-static struct central_cache_struct *thread_slab = NULL;
-// List of free central_cache_struct
-static struct central_cache_strcut *free_central = NULL;
-// List of free thread_cache_struct
-static struct thread_cache_struct *free_thread = NULL;
+// Pointer to allocation central_cache
+static struct central_cache *central_slab = NULL;
+// Pointer to allocation central_cache
+static struct central_cache *thread_slab = NULL;
+// List of free central_cache
+static struct central_cache *free_central = NULL;
+// List of free thread_cache
+static struct thread_cache *free_thread = NULL;
 // Key to get thread cache
 static pthread_key_t tkey;
 static pthread_once_t once_flag = PTHREAD_ONCE_INIT;
@@ -27,8 +27,9 @@ static pthread_mutex_t mutex;
 */
 // For thread_once
 static void once_func(void);
-static struct thread_cache_struct *thread_init(void);
+static struct thread_cache *thread_init(void);
+void central_init(struct central_cache* cc);
 void add_central(void);
-struct thread_cache_struct *get_current_thread_cache(void);
+struct thread_cache *get_current_thread(void);
 
 #endif

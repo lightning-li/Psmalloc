@@ -7,7 +7,7 @@
 void *ps_malloc(size_t size) __THROW
 {
         void *ret = NULL;
-        if (size > max_critical_size) {
+        if (size > critical_size) {
                 ret = do_mmap_malloc(size);
         } else {
                 ret = do_heap_malloc(size);
@@ -18,7 +18,7 @@ void *ps_malloc(size_t size) __THROW
 void *ps_calloc(size_t n, size_t size) __THROW
 {
         void *ret = NULL;
-        if (n*size > max_critical_size) {
+        if (n*size > critical_size) {
                 ret = do_mmap_calloc(n, size);
         } else {
                 ret = do_heap_calloc(n, size);
@@ -28,7 +28,7 @@ void *ps_calloc(size_t n, size_t size) __THROW
 
 void *ps_realloc(void *ptr, size_t size) __THROW
 {
-        if (size > max_critical_size) {
+        if (size > critical_size) {
                 ret = do_mmap_realloc(ptr, size);
         } else {
                 ret = do_heap_realloc(ptr, size);

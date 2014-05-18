@@ -73,6 +73,7 @@ struct thread_cache {
 // Each chunk has a chunk_head at the beginning
 struct chunk_head {
         enum chunk_kind   kind;
+        size_t            seek;
         struct chunk_head *next;
 };
 

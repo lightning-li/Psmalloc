@@ -1,6 +1,7 @@
 #include "common.h"
 #include "heap_alloc.h"
 #include "global_operation.h"
+#include "thread_operation.h"
 
 void *do_heap_malloc(size_t size)
 {

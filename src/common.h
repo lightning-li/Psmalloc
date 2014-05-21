@@ -53,7 +53,6 @@ enum chunk_kind {
 struct central_cache {
         void                         *start;
         void                         *current;
-        struct chunk_head            *free_chunk;
         struct chunk_head            *tiny_chunk;
         struct chunk_head            *small_chunk;
         struct chunk_head            *medium_chunk;

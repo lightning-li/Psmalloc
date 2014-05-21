@@ -17,7 +17,7 @@ enum chunk_kind check_size(size_t size)
 void *chunk_hook(struct thread_cache *tc, size_t size, int flag)
 {
         void *ret = NULL;
-        size_t *ptr = NULL;
+        size_t *size_ptr = NULL;
         struct chunk_head *ch = NULL;
         enum chunk_kind kind = check_size(size);
 
@@ -26,17 +26,17 @@ void *chunk_hook(struct thread_cache *tc, size_t size, int flag)
         ret = ch + 1;
         // Check if it is neccessary to initialize to zero
         if (flag) {
-                ptr = ret;
+                size_ptr = ret;
                 for (size=size/sizeof(size_t)+1; size>0; --size)
-                        *(ptr++) = 0;
+                        *(size_ptr++) = 0;
         }
         return ret;
 }
 
 void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
 {
-        size_t *old_ptr = ptr;
-        size_t *new_ptr = NULL;
+        size_t *old_size_ptr = ptr;
+        size_t *new_size_ptr = NULL;
         struct chunk_head *old_ch = ptr - chunk_head_size;
         struct chunk_head *new_ch = NULL;
         size_t old_size = ch->seek;

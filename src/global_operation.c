@@ -53,46 +53,52 @@ void central_init(struct central_cache *cc)
         int index;
         struct chunk_head *ch;
 
-        cc->tiny_chunk = NULL;
-        cc->small_chunk = NULL;
-        cc->medium_chunk = NULL;
-        cc->big_chunk = NULL;
-        cc->huge_chunk = NULL;
-        cc->next = NULL;
-        
         // Renew current
         cc->current = cc->start;
-        cc->free_chunk = cc->current;
-
-        // For 4 tiny chunks
+        cc->next = NULL;
+        
+        // 4 tiny chunks
+        cc->tiny_chunk = cc->current;
         for (index=0; index<4; ++index) {
                 ch = cc->current;
                 cc->current += tiny_chunk_size;
                 ch->kind = tiny;
                 ch->next = cc->current;
         }
-        // For 4 small chunks
+        ch->next = NULL;
+        
+        // 4 small chunks
+        cc->small_chunk = c->current;
         for (index=0; index<4; ++index) {
                 ch = cc->current;
                 cc->current += small_chunk_size;
                 ch->kind = small;
                 ch->next = cc->current;
         }
-        // For 4 medium chunks
+        ch->next = NULL;
+        
+        // 4 medium chunks
+        cc->medium_chunk = c->current;
         for (index=0; index<4; ++index) {
                 ch = cc->current;
                 cc->current += medium_chunk_size;
                 ch->kind = medium;
                 ch->next = cc->current;
         }
-        // For 4 big chunks
+        ch->next = NULL;
+        
+        // 4 big chunks
+        cc->big_chunk = cc->current;
         for (index=0; index<4; ++index) {
                 ch = cc->current;
                 cc->current += big_chunk_size;
                 ch->kind = big;
                 ch->next = cc->current;
         }
-        // For 1 huge chunk
+        ch->next = NULL;
+        
+        // 1 huge chunk
+        cc->huge_chunk = cc->current;
         ch = cc->current;
         cc->current += huge_chunk_size;
         ch->kind = huge;

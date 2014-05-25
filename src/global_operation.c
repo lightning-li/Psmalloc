@@ -7,7 +7,6 @@ static void once_func(void)
 {
         // mutex initialize
         pthread_mutex_init(&mutex, NULL);
-
         // Create thread key
         pthread_key_create(&tkey, NULL);
 
@@ -26,7 +25,7 @@ static struct thread_cache *thread_init(void)
         pthread_mutex_lock(&mutex);
         // Check if there is free central cache
         if (free_central == NULL)
-                add_central();
+                global_add_central();
 
         // Get thread cache for current thread
         if (free_thread == NULL)
@@ -48,64 +47,18 @@ static struct thread_cache *thread_init(void)
         return tc;
 }
 
-void central_init(struct central_cache *cc)
+static void central_init(struct central_cache *cc)
 {
         int index;
         struct chunk_head *ch;
 
-        // Renew current
-        cc->current = cc->start;
         cc->next = NULL;
-        
-        // 4 tiny chunks
-        cc->tiny_chunk = cc->current;
-        for (index=0; index<4; ++index) {
-                ch = cc->current;
-                cc->current += tiny_chunk_size;
-                ch->kind = tiny;
-                ch->next = cc->current;
-        }
-        ch->next = NULL;
-        
-        // 4 small chunks
-        cc->small_chunk = c->current;
-        for (index=0; index<4; ++index) {
-                ch = cc->current;
-                cc->current += small_chunk_size;
-                ch->kind = small;
-                ch->next = cc->current;
-        }
-        ch->next = NULL;
-        
-        // 4 medium chunks
-        cc->medium_chunk = c->current;
-        for (index=0; index<4; ++index) {
-                ch = cc->current;
-                cc->current += medium_chunk_size;
-                ch->kind = medium;
-                ch->next = cc->current;
-        }
-        ch->next = NULL;
-        
-        // 4 big chunks
-        cc->big_chunk = cc->current;
-        for (index=0; index<4; ++index) {
-                ch = cc->current;
-                cc->current += big_chunk_size;
-                ch->kind = big;
-                ch->next = cc->current;
-        }
-        ch->next = NULL;
-        
-        // 1 huge chunk
-        cc->huge_chunk = cc->current;
-        ch = cc->current;
-        cc->current += huge_chunk_size;
-        ch->kind = huge;
-        ch->next = NULL;
+        cc->free_chunk = cc->start;
+        cc->free_chunk->seek = c->start + central_cache_size;
+        cc->free_chunk->next = NULL;
 }
 
-void add_central(void)
+static void global_add_central(void)
 {
         void *ptr = NULL;
         char index = 0;
@@ -124,6 +77,28 @@ void add_central(void)
                 ++index
         }
         cc->next = NULL;
+}
+
+void thread_add_central(struct thread_cache *tc)
+{
+        struct central_cache *old_cc = tc->cc;
+        struct central_cache *new_cc = NULL;
+        struct thread_cache *tc  = NULL;
+
+        pthread_mutex_lock(&mutex);
+        // Check if there is free central cache
+        if (free_central == NULL)
+                global_add_central();
+        // Get first free central cache
+        free_central = (new_cc = free_central).next;
+        pthread_mutex_unlock(&mutex);
+
+        // Initialize chunks in central
+        central_init(new_cc);
+        // Add new central to thread cache
+        while (old_cc->next != NULL)
+                old_cc = old_cc->next;
+        old_cc->next = new_cc;
 }
 
 struct thread_cache *get_current_thread(void)

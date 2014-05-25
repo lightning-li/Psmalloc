@@ -10,7 +10,7 @@
 #define PSMALLOC_PSMALLOC_H_
 
 #include <sys/cdefs.h>        // for __THROW
-#include <stddef.h>           // for size_t, NULL
+#include <stddef.h>           // for size_t
 
 
 void *ps_malloc(size_t size) __THROW;

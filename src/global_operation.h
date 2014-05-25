@@ -28,8 +28,9 @@ static pthread_mutex_t mutex;
 // For thread_once
 static void once_func(void);
 static struct thread_cache *thread_init(void);
-void central_init(struct central_cache* cc);
-void add_central(void);
+static void central_init(struct central_cache* cc);
+static void global_add_central(void);
+void thread_add_central(struct thread_cache *tc);
 struct thread_cache *get_current_thread(void);
 
 #endif

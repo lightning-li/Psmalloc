@@ -1,7 +1,7 @@
 #include "thread_operation.h"
 #include "global_operation.h"
 
-void *chunk_hook(struct thread_cache *tc, size_t size, int flag)
+void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag)
 {
         void *ret = NULL;
         size_t *size_ptr = NULL;
@@ -31,10 +31,6 @@ void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
         enum chunk_kind kind;
         int num = check_size(size, &kind);
 
-        // Same chunk
-        if (kind == old_ch->kind && num == old_ch->num)
-                return ptr;
-
         new_ch = get_suitable_chunk(tc, kind, num, old_ch);
         // Same address
         if (new_ch == old_ch) {
@@ -62,12 +58,49 @@ struct central_cache *find_central_of_pointer(struct thread_cache *tc,
         return cc;
 }
 
+void add_free_chunk(struct central_cache *cc,struct chunk_head *ch)
+{
+        struct chunk_head *prev_ch = cc->free_chunk;
+        struct chunk_head *next_ch = prev_ch;
+        size_t ch_size = chunk_size[ch->kind] * ch->num;
+
+        for (; next_ch!=NULL; prev_ch=next_ch, next_ch=next_ch->next) {
+                if (next_ch > ch)
+                        break;
+        }
+
+        // Check arround target chunk
+        // Piece front
+        if (next_ch == cc->free_chunk) {
+                cc->free_chunk = ch;
+                ch->seek = ch_size;
+        } else {
+                if (((void*)prev_ch + prev_ch->seek + 1) == ch) {
+                        ch = prev_ch;
+                        ch->seek += ch_size;
+                } else {
+                        prev_ch->next = ch;
+                        ch->seek = ch_size;
+                }
+        }
+
+        // Piece behind
+        if (next_ch != NULL) {
+                if (((void*)ch + ch->seek + 1) == next_ch) {
+                        ch->seek += next_ch->seek;
+                        ch->next = next_ch->next;
+                } else {
+                        ch->next = next_ch;
+                }
+        }
+}
+
 static int check_size(size_t size, enum chunk_kind &kind)
 {
         int index;
         for (index=0; index<4; ++index) {
-                if (size <= (chunk_size[index+1]-chunk_size[index]
-                             - chunk_head_size)) {
+                if (size <=
+                    (chunk_size[index+1]-chunk_size[index]-chunk_head_size)) {
                         kind = index;
                         return size/chunk_size[index] + 1;
                 }
@@ -82,11 +115,12 @@ static void *get_suitable_chunk(struct thread_cache *tc,
 {
         struct chunk_head *ch = NULL;
         struct chunk_head *prev_ch = NULL;
-        struct central_cache *cc = tc->cc;
+        struct central_cache *cc = NULL;
         size_t target_size = chunk_size[kind] * num;
 
         // realloc
         if (old_ch != NULL) {
+                cc = find_central_of_pointer(tc, old_ch);
                 if (old_ch->kind == kind) {                     // Same kind
                         if (old_ch->num == num) {           // Same num
                                 return old_ch;
@@ -94,14 +128,14 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                                 ch = (void*)old_ch + target_size;
                                 ch->kind = kind;
                                 ch->num = old_ch->num - num;
-                                add_free_chunk(tc,ch);
+                                add_free_chunk(cc,ch);
                                 
                                 // Change old chunk
                                 old_ch->num = num;
                                 return old_ch;
                         } else {                            // More num
                                 // Check if it is free behind old chunk
-                                ch = get_appoint_chunk(tc,
+                                ch = get_appoint_chunk(cc,
                                                        target_size - 
                                                        chunk_size[kind] *
                                                        old_ch->num,
@@ -121,12 +155,12 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                         ch = (void*)old_ch + target_size;
                         ch->kind = kind;
                         ch->num = old_ch->num - num;
-                        add_free_chunk(tc, ch);
+                        add_free_chunk(cc, ch);
 
                         old_ch->num = num;
                         return old_ch;
                 } else {                                        // Bigger kind
-                        ch = get_appoint_chunk(tc,
+                        ch = get_appoint_chunk(cc,
                                             target_size -
                                             chunk_size[old_ch->kind]*
                                             old_ch->num,
@@ -180,10 +214,9 @@ static void *get_suitable_chunk(struct thread_cache *tc,
         return ch;
 }
 
-static void *get_appoint_chunk(struct thread_cache *tc,
+static void *get_appoint_chunk(struct central_cache *cc,
                                size_t size, void *ptr)
 {
-        struct central_cache *cc = find_central_of_pointer(tc, ptr);
         struct chunk_head *ch = cc->free_chunk;
         struct chunk_head prev_ch = ch;
 
@@ -215,40 +248,3 @@ static void *get_appoint_chunk(struct thread_cache *tc,
         return ch;
 }
 
-static void add_free_chunk(struct thread_cache *tc,struct chunk_head *ch)
-{
-        struct central_cache *cc = find_central_of_pointer(tc, ch);
-        struct chunk_head *prev_ch = cc->free_chunk;
-        struct chunk_head *next_ch = prev_ch;
-        size_t ch_size = chunk_size[ch->kind] * ch->num;
-
-        for (; next_ch!=NULL; prev_ch=next_ch, next_ch=next_ch->next) {
-                if (next_ch > ch)
-                        break;
-        }
-
-        // Check arround target chunk
-        // Piece front
-        if (next_ch == cc->free_chunk) {
-                cc->free_chunk = ch;
-                ch->seek = ch_size;
-        } else {
-                if (((void*)prev_ch + prev_ch->seek + 1) == ch) {
-                        ch = prev_ch;
-                        ch->seek += ch_size;
-                } else {
-                        prev_ch->next = ch;
-                        ch->seek = ch_size;
-                }
-        }
-
-        // Piece behind
-        if (next_ch != NULL) {
-                if (((void*)ch + ch->seek + 1) == next_ch) {
-                        ch->seek += next_ch->seek;
-                        ch->next = next_ch->next;
-                } else {
-                        ch->next = next_ch;
-                }
-        }
-}

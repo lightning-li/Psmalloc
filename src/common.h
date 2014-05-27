@@ -19,7 +19,7 @@
 */
 
 // Size of slab for central and thread struct
-static const size_t central_slab_size = 1024*500;          // 500 KB
+static const size_t central_slab_size = 1024*250;          // 250 KB
 static const size_t thread_slab_size  = 1024*50;           // 50 KB
 
 // Size of each central cache
@@ -60,7 +60,14 @@ struct central_cache {
 struct thread_cache {
         size_t               count;
         struct central_cache *cc;
+        struct mmap_head     *map_list;
 };
+
+// Each mmap block has a mmap_head at the beginning
+struct mmap_head {
+        size_t           seek;
+        struct mmap_head *next;
+}
 
 // Each chunk has a chunk_head at the beginning
 struct chunk_head {
@@ -70,6 +77,7 @@ struct chunk_head {
         struct chunk_head    *next;
 };
 
+static const size_t mmap_head_size = sizeof(struct mmap_head);
 static const size_t chunk_head_size = sizeof(struct chunk_head);
 static const size_t critical_size = 1024*32*3 - sizeof(struct chunk_head);
 

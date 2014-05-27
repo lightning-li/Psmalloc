@@ -1,4 +1,4 @@
-#include "thread_operation.h"
+#include "heap_hook.h"
 #include "global_operation.h"
 
 void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag)
@@ -44,7 +44,7 @@ void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
         for (size=size/sizeof(size_t)+1; size>0; --size)
                 *(new_ptr++) = *(old_ptr++);
 
-        add_free_chunk(old_ch);
+        do_chunk_free(find_central_of_pointer(tc, old_ch), old_ch);
         return new_ch+1;
 }
 
@@ -58,7 +58,7 @@ struct central_cache *find_central_of_pointer(struct thread_cache *tc,
         return cc;
 }
 
-void add_free_chunk(struct central_cache *cc,struct chunk_head *ch)
+void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
 {
         struct chunk_head *prev_ch = cc->free_chunk;
         struct chunk_head *next_ch = prev_ch;
@@ -174,6 +174,8 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                 }
         }
 
+        if (tc->cc == NULL)
+                thread_add_central(tc);
         cc = tc->cc;
         // Find in central caches
         while (1) {
@@ -186,10 +188,9 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                 }
                 if (ch != NULL)
                         break;
-                if ((cc = cc->next) == NULL) {
+                if (cc->next == NULL)
                         thread_add_central(tc);
-                        cc = cc->next;
-                }
+                cc = cc->next;
         }
 
         // Initialize target chunk

@@ -1,20 +1,20 @@
-#include "init.h"
-#include "alloc_hook.h"
-#include "free.h"
+#include "global_operation.h"
 #include <unistd.h>
 
 static void once_func(void)
 {
         // mutex initialize
-        pthread_mutex_init(&mutex, NULL);
+        pthread_mutex_init(&head_mutex, NULL);
+        pthread_mutex_init(&mmap_mutex, NULL);
+        
         // Create thread key
         pthread_key_create(&tkey, NULL);
 
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&heap_mutex);
         // Allocation for central and thread struct
         central_slab = sbrk(central_slab_size);
         thread_slab  = sbrk(thread_slab_size);
-        pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&heap_mutex);
 }
 
 static struct thread_cache *thread_init(void)
@@ -39,15 +39,14 @@ static struct thread_cache *thread_init(void)
         
         pthread_mutex_unlock(&mutex);
 
-        // Initialize chunks in central
-        central_init(cc);
+        central_renew(cc);
         // Initialize thread_cache_struct
         tc->count = 0;
         tc->cc = cc;
         return tc;
 }
 
-static void central_init(struct central_cache *cc)
+static void central_renew(struct central_cache *cc)
 {
         int index;
         struct chunk_head *ch;
@@ -70,7 +69,7 @@ static void global_add_central(void)
         // Initialize four central caches
         while(1) {
                 cc->start = sbrk(central_cache_size);
-                if (index == 3)
+                if (index == (num_of_init_central-1))
                         break;
                 cc->next = central_slab++;
                 cc = cc->next;
@@ -81,7 +80,7 @@ static void global_add_central(void)
 
 void thread_add_central(struct thread_cache *tc)
 {
-        struct central_cache *old_cc = tc->cc;
+        struct central_cache *old_cc = NULL;
         struct central_cache *new_cc = NULL;
         struct thread_cache *tc  = NULL;
 
@@ -94,11 +93,15 @@ void thread_add_central(struct thread_cache *tc)
         pthread_mutex_unlock(&mutex);
 
         // Initialize chunks in central
-        central_init(new_cc);
+        central_renew(new_cc);
         // Add new central to thread cache
-        while (old_cc->next != NULL)
-                old_cc = old_cc->next;
-        old_cc->next = new_cc;
+        if ((old_cc = tc->cc) == NULL) {
+                tc->cc = new_cc;
+        } else {
+                while (old_cc->next != NULL)
+                        old_cc = old_cc->next;
+                old_cc->next = new_cc;
+        }
 }
 
 struct thread_cache *get_current_thread(void)

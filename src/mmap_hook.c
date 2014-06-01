@@ -3,11 +3,11 @@
 #include "global_operation.h"
 #include "heap_hook.h"
 #include <sys/mman.h>
+#include <string.h>
 
 void *mmap_alloc_hook(struct thread_cache *tc, size_t size, int flag)
 {
         void *ret = NULL;
-        char *char_ptr = NULL;
         struct chunk_head *mm = NULL;
         struct chunk_head *mm_prev = tc->mh;
 
@@ -28,18 +28,14 @@ void *mmap_alloc_hook(struct thread_cache *tc, size_t size, int flag)
         
         ret = mm + 1;
         // calloc
-        if (flag) {
-                char_ptr = ret;
-                for (; size>0; --size)
-                        *(char_ptr++) = 0;
-        }
+        if (flag)
+                menset(ret, 0, size);
+
         return ret;
 }
 
 void *mmap_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
 {
-        char *new_chp = NULL;
-        char *old_chp = ptr;
         struct chunk_head *new_mm = NULL;
         // It could be in mmap or central
         struct chunk_head *old_mm = ptr - chunk_head_size;
@@ -50,11 +46,8 @@ void *mmap_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
         new_mm = mmap(NULL, size + chunk_head_size, PROT_READ | PROT_WRITE,
                       MAP_PRIVATE | MAP_ANON, -1, 0);
         // Copy data
-        new_chp = new_mm + 1;
-        size = old_mm->seek;
-        while (; size>0; --size)
-                *(new_chp++) = *(old_chp++);
-
+        memcpy(new_mm + 1, ptr, old_mm->seek);
+        
         // Release old
         if (old_mm > sbrk(0))    // Old pointer is in mmap
                 do_mmap_free(tc, old_mm);

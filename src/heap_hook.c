@@ -1,10 +1,10 @@
 #include "heap_hook.h"
 #include "global_operation.h"
+#include <string.h>
 
 void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag)
 {
         void *ret = NULL;
-        size_t *size_ptr = NULL;
         struct chunk_head *ch = NULL;
         enum chunk_kind kind;
         int num = check_size(size, &kind);
@@ -14,18 +14,13 @@ void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag)
         ret = ch + 1;
 
         // calloc
-        if (flag) {
-                size_ptr = ret;
-                for (size=size/sizeof(size_t)+1; size>0; --size)
-                        *(size_ptr++) = 0;
-        }
+        if (flag)
+                memset(ret, 0, size)
         return ret;
 }
 
 void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
 {
-        size_t *old_ptr = ptr;
-        size_t *new_ptr = NULL;
         struct chunk_head *old_ch = ptr - chunk_head_size;
         struct chunk_head *new_ch = NULL;
         size_t old_size = ch->seek;
@@ -39,10 +34,8 @@ void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
                 return ptr;
         }
         
-        new_ptr = new_ch + 1;
         // Copy data from old chunk to new chunk
-        for (size=old_size/sizeof(size_t)+1; size>0; --size)
-                *(new_ptr++) = *(old_ptr++);
+        memcpy(new_ch+1, ptr, old_size);
 
         do_chunk_free(find_central_of_pointer(tc, old_ch), old_ch);
         return new_ch+1;

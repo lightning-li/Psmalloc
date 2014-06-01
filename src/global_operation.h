@@ -23,9 +23,8 @@ static struct thread_cache *free_thread = NULL;
 static pthread_key_t tkey;
 static pthread_once_t once_flag = PTHREAD_ONCE_INIT;
 
-// Mutex when global get central cache or mmap
-static pthread_mutex_t heap_mutex;
-static pthread_mutex_t mmap_mutex;
+// Mutex when global get central cache
+static pthread_mutex_t mutex;
 
 /*
   function

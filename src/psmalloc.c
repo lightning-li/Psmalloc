@@ -60,7 +60,7 @@ void ps_free(void *ptr) __THROW
         if (cc != NULL)
                 do_chunk_free(cc, ptr - chunk_head_size);
         else
-                do_mmap_free(tc, ptr - mmap_head_size);
+                do_mmap_free(tc, ptr - chunk_head_size);
 
         // Check if this thread till be used
         check_thread_use();

@@ -60,14 +60,8 @@ struct central_cache {
 struct thread_cache {
         size_t               count;
         struct central_cache *cc;
-        struct mmap_head     *map_list;
+        struct chunk_head    *mm;
 };
-
-// Each mmap block has a mmap_head at the beginning
-struct mmap_head {
-        size_t           seek;
-        struct mmap_head *next;
-}
 
 // Each chunk has a chunk_head at the beginning
 struct chunk_head {
@@ -77,7 +71,6 @@ struct chunk_head {
         struct chunk_head    *next;
 };
 
-static const size_t mmap_head_size = sizeof(struct mmap_head);
 static const size_t chunk_head_size = sizeof(struct chunk_head);
 static const size_t critical_size = 1024*32*3 - sizeof(struct chunk_head);
 

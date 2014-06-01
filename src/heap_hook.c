@@ -12,7 +12,8 @@ void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag)
         ch = get_suitable_chunk(tc, kind, num, NULL);
         ch->seek = size;
         ret = ch + 1;
-        // Check if it is neccessary to initialize to zero
+
+        // calloc
         if (flag) {
                 size_ptr = ret;
                 for (size=size/sizeof(size_t)+1; size>0; --size)
@@ -40,8 +41,7 @@ void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
         
         new_ptr = new_ch + 1;
         // Copy data from old chunk to new chunk
-        size = (size>old_size)?old_size:size;
-        for (size=size/sizeof(size_t)+1; size>0; --size)
+        for (size=old_size/sizeof(size_t)+1; size>0; --size)
                 *(new_ptr++) = *(old_ptr++);
 
         do_chunk_free(find_central_of_pointer(tc, old_ch), old_ch);

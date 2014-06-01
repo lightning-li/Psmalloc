@@ -4,9 +4,7 @@
 static void once_func(void)
 {
         // mutex initialize
-        pthread_mutex_init(&head_mutex, NULL);
-        pthread_mutex_init(&mmap_mutex, NULL);
-        
+        pthread_mutex_init(&mutex, NULL);
         // Create thread key
         pthread_key_create(&tkey, NULL);
 

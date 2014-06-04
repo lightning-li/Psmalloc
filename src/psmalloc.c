@@ -12,7 +12,7 @@ void *ps_malloc(size_t size) __THROW
         current_thread->count++;
         if (size > critical_size) {
                 // Third argument is zero
-                // Bytes in chunk will not be initialized
+                // Bytes in chunk will not be initialized 
                 ret = chunk_alloc_hook(current_thread, size, 0);
         } else {
                 ret = mmap_alloc_hook(current_thread, size, 0);
@@ -43,9 +43,9 @@ void *ps_realloc(void *ptr, size_t size) __THROW
 
         current_thread->count++;
         if (size < critical_size) {
-                ret = chunk_realloc_hook(tc, ptr, size);
+                ret = chunk_realloc_hook(current_thread, ptr, size);
         } else {
-                ret = mmap_realloc_hook(tc, ptr, size);
+                ret = mmap_realloc_hook(current_thread, ptr, size);
         }
         return ret;
 }
@@ -60,7 +60,7 @@ void ps_free(void *ptr) __THROW
         if (cc != NULL)
                 do_chunk_free(cc, ptr - chunk_head_size);
         else
-                do_mmap_free(tc, ptr - chunk_head_size);
+                do_mmap_free(current_thread, ptr - chunk_head_size);
 
         // Check if this thread till be used
         check_thread_use();

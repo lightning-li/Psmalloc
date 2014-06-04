@@ -12,6 +12,9 @@
 #include <sys/cdefs.h>        // for __THROW
 #include <stddef.h>           // for size_t
 
+#ifndef __THROW
+#define __THROW
+#endif
 
 void *ps_malloc(size_t size) __THROW;
 

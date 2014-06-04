@@ -8,11 +8,11 @@ static void once_func(void)
         // Create thread key
         pthread_key_create(&tkey, NULL);
 
-        pthread_mutex_lock(&heap_mutex);
+        pthread_mutex_lock(&mutex);
         // Allocation for central and thread struct
         central_slab = sbrk(central_slab_size);
         thread_slab  = sbrk(thread_slab_size);
-        pthread_mutex_unlock(&heap_mutex);
+        pthread_mutex_unlock(&mutex);
 }
 
 static struct thread_cache *thread_init(void)
@@ -25,14 +25,11 @@ static struct thread_cache *thread_init(void)
         if (free_central == NULL)
                 global_add_central();
 
-        // Get thread cache for current thread
-        if (free_thread == NULL)
-                tc = thread_slab++;
-        else
-                free_thread = (tc = free_thread).next;
+        // Get thread cache
+        tc = thread_slab++;
 
         // Get first free central cache
-        free_central = (cc = free_central).next;
+        free_central = (cc = free_central)->next;
         pthread_setspecific(tkey, tc);
         
         pthread_mutex_unlock(&mutex);
@@ -51,7 +48,7 @@ static void central_renew(struct central_cache *cc)
 
         cc->next = NULL;
         cc->free_chunk = cc->start;
-        cc->free_chunk->seek = c->start + central_cache_size;
+        cc->free_chunk->seek = cc->start + central_cache_size;
         cc->free_chunk->next = NULL;
 }
 
@@ -71,7 +68,7 @@ static void global_add_central(void)
                         break;
                 cc->next = central_slab++;
                 cc = cc->next;
-                ++index
+                ++index;
         }
         cc->next = NULL;
 }
@@ -80,14 +77,13 @@ void thread_add_central(struct thread_cache *tc)
 {
         struct central_cache *old_cc = NULL;
         struct central_cache *new_cc = NULL;
-        struct thread_cache *tc  = NULL;
 
         pthread_mutex_lock(&mutex);
         // Check if there is free central cache
         if (free_central == NULL)
                 global_add_central();
         // Get first free central cache
-        free_central = (new_cc = free_central).next;
+        free_central = (new_cc = free_central)->next;
         pthread_mutex_unlock(&mutex);
 
         // Initialize chunks in central

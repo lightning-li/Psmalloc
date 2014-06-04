@@ -16,9 +16,6 @@ static struct central_cache *thread_slab = NULL;
 // List of free central_cache
 static struct central_cache *free_central = NULL;
 
-// List of free thread_cache
-static struct thread_cache *free_thread = NULL;
-
 // Key to get thread cache
 static pthread_key_t tkey;
 static pthread_once_t once_flag = PTHREAD_ONCE_INIT;

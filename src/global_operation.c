@@ -79,6 +79,7 @@ void thread_add_central(struct thread_cache *tc)
         struct central_cache *new_cc = NULL;
 
         pthread_mutex_lock(&mutex);
+        
         // Check if there is free central cache
         if (free_central == NULL)
                 global_add_central();

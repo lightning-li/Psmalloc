@@ -88,17 +88,17 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
         }
 }
 
-static int check_size(size_t size, enum chunk_kind &kind)
+static int check_size(size_t size, enum chunk_kind *kind)
 {
         int index;
         for (index=0; index<4; ++index) {
                 if (size <=
                     (chunk_size[index+1]-chunk_size[index]-chunk_head_size)) {
-                        kind = index;
+                        *kind = index;
                         return size/chunk_size[index] + 1;
                 }
         }
-        kind = index;
+        *kind = index;
         return size/chunk_size[index] + 1;
 }
 

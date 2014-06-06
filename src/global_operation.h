@@ -11,7 +11,7 @@
 static struct central_cache *central_slab = NULL;
 
 // Pointer to allocation central_cache
-static struct central_cache *thread_slab = NULL;
+static struct thread_cache *thread_slab = NULL;
 
 // List of free central_cache
 static struct central_cache *free_central = NULL;

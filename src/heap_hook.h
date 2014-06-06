@@ -11,7 +11,7 @@ void do_chunk_free(struct central_cache *cc, struct chunk_head *ch);
 struct central_cache *find_central_of_pointer(struct thread_cache *tc,
                                               void *ptr);
 // Check kind and num from the require size
-static int check_size(size_t size, enum chunk_kind &kind);
+static int check_size(size_t size, enum chunk_kind *kind);
 
 // Get suitable chunk
 static void *get_suitable_chunk(struct thread_cache *tc,

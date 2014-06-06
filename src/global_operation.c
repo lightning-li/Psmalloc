@@ -48,7 +48,7 @@ static void central_renew(struct central_cache *cc)
 
         cc->next = NULL;
         cc->free_chunk = cc->start;
-        cc->free_chunk->seek = cc->start + central_cache_size;
+        cc->free_chunk->seek = central_cache_size;
         cc->free_chunk->next = NULL;
 }
 

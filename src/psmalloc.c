@@ -4,7 +4,7 @@
 #include "heap_hook.h"
 #include "mmap_hook.h"
 
-void *ps_malloc(size_t size) __THROW
+void *ps_malloc(size_t size)
 {
         void *ret = NULL;
         struct thread_cache *current_thread = get_current_thread();
@@ -20,7 +20,7 @@ void *ps_malloc(size_t size) __THROW
         return ret;
 }
 
-void *ps_calloc(size_t n, size_t size) __THROW
+void *ps_calloc(size_t n, size_t size)
 {
         void *ret = NULL;
         struct thread_cache *current_thread = get_current_thread();
@@ -36,7 +36,7 @@ void *ps_calloc(size_t n, size_t size) __THROW
         return ret;
 }
 
-void *ps_realloc(void *ptr, size_t size) __THROW
+void *ps_realloc(void *ptr, size_t size)
 {
         void *ret = NULL;
         struct thread_cache *current_thread = get_current_thread();
@@ -50,7 +50,7 @@ void *ps_realloc(void *ptr, size_t size) __THROW
         return ret;
 }
 
-void ps_free(void *ptr) __THROW
+void ps_free(void *ptr)
 {
         struct central_cache *cc = NULL;
         struct thread_cache *current_thread = get_current_thread();

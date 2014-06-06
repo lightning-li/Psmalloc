@@ -121,7 +121,7 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                                 ch = (void*)old_ch + target_size;
                                 ch->kind = kind;
                                 ch->num = old_ch->num - num;
-                                add_free_chunk(cc,ch);
+                                do_chunk_free(cc,ch);
                                 
                                 // Change old chunk
                                 old_ch->num = num;
@@ -148,7 +148,7 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                         ch = (void*)old_ch + target_size;
                         ch->kind = kind;
                         ch->num = old_ch->num - num;
-                        add_free_chunk(cc, ch);
+                        do_chunk_free(cc, ch);
 
                         old_ch->num = num;
                         return old_ch;

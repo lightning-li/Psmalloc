@@ -1,5 +1,6 @@
 #include "global_operation.h"
 #include <unistd.h>
+#include <pthread.h>
 
 static void once_func(void)
 {
@@ -113,4 +114,19 @@ struct thread_cache *get_current_thread(void)
         return tc;
 }
 
-                        
+void check_thread_use(struct thread_cache *tc)
+{
+        struct central_cache *cc = NULL;
+
+        if (tc->count != 0)
+                return;
+
+        // Add all central caches in thread to free central
+        cc = tc->cc;
+        while (cc->next!=NULL)
+                cc = cc->next;
+        cc->next = free_central;
+        free_central = tc->cc;
+
+        tc->cc = NULL;
+}

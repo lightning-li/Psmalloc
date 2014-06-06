@@ -29,7 +29,7 @@ void *mmap_alloc_hook(struct thread_cache *tc, size_t size, int flag)
         ret = mm + 1;
         // calloc
         if (flag)
-                menset(ret, 0, size);
+                memset(ret, 0, size);
 
         return ret;
 }

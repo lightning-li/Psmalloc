@@ -44,4 +44,6 @@ void thread_add_central(struct thread_cache *tc);
 // Return current thread
 struct thread_cache *get_current_thread(void);
 
+void check_thread_use(struct thread_cache *tc);
+
 #endif

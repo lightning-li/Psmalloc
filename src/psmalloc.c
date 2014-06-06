@@ -63,5 +63,5 @@ void ps_free(void *ptr)
                 do_mmap_free(current_thread, ptr - chunk_head_size);
 
         // Check if this thread till be used
-        check_thread_use();
+        check_thread_use(current_thread);
 }

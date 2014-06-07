@@ -3,6 +3,7 @@
 #include "global_operation.h"
 #include "heap_hook.h"
 #include "mmap_hook.h"
+#include <stdio.h>
 
 void *ps_malloc(size_t size)
 {
@@ -10,7 +11,7 @@ void *ps_malloc(size_t size)
         struct thread_cache *current_thread = get_current_thread();
 
         current_thread->count++;
-        if (size > critical_size) {
+        if (size < critical_size) {
                 // Third argument is zero
                 // Bytes in chunk will not be initialized 
                 ret = chunk_alloc_hook(current_thread, size, 0);
@@ -26,7 +27,7 @@ void *ps_calloc(size_t n, size_t size)
         struct thread_cache *current_thread = get_current_thread();
 
         current_thread->count++;
-        if (n*size > critical_size) {
+        if (n*size < critical_size) {
                 // Third argument is one
                 // Bytes in chunk will be initialized
                 ret = chunk_alloc_hook(current_thread, size*n, 1);
@@ -55,6 +56,7 @@ void ps_free(void *ptr)
         struct central_cache *cc = NULL;
         struct thread_cache *current_thread = get_current_thread();
         current_thread->count--;
+        printf("count %zu\n", current_thread->count);
         
         cc = find_central_of_pointer(current_thread, ptr);
         if (cc != NULL)

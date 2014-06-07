@@ -1,6 +1,7 @@
 #include "heap_hook.h"
 #include "global_operation.h"
 #include <string.h>
+#include <stdio.h>
 
 void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag)
 {
@@ -56,7 +57,7 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
         struct chunk_head *prev_ch = cc->free_chunk;
         struct chunk_head *next_ch = prev_ch;
         size_t ch_size = chunk_size[ch->kind] * ch->num;
-
+        
         for (; next_ch!=NULL; prev_ch=next_ch, next_ch=next_ch->next) {
                 if (next_ch > ch)
                         break;
@@ -79,13 +80,13 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
 
         // Piece behind
         if (next_ch != NULL) {
-                if (((void*)ch + ch->seek + 1) == next_ch) {
+                if (((void*)ch + ch->seek) == next_ch) {
                         ch->seek += next_ch->seek;
                         ch->next = next_ch->next;
                 } else {
                         ch->next = next_ch;
                 }
-        }
+         }
 }
 
 static int check_size(size_t size, enum chunk_kind *kind)
@@ -93,9 +94,9 @@ static int check_size(size_t size, enum chunk_kind *kind)
         int index;
         for (index=0; index<4; ++index) {
                 if (size <=
-                    (chunk_size[index+1]-chunk_size[index]-chunk_head_size)) {
+                    (3*chunk_size[index] - chunk_head_size)) {
                         *kind = index;
-                        return size/chunk_size[index] + 1;
+                        return (size+chunk_head_size)/chunk_size[index] + 1;
                 }
         }
         *kind = index;

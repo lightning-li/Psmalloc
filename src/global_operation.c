@@ -1,6 +1,7 @@
 #include "global_operation.h"
 #include <unistd.h>
 #include <pthread.h>
+#include <stdio.h>
 
 static void once_func(void)
 {
@@ -45,7 +46,6 @@ static struct thread_cache *thread_init(void)
 static void central_renew(struct central_cache *cc)
 {
         int index;
-        struct chunk_head *ch;
 
         cc->next = NULL;
         cc->free_chunk = cc->start;

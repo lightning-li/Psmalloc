@@ -18,7 +18,6 @@ static struct central_cache *free_central = NULL;
 
 // Key to get thread cache
 static pthread_key_t tkey;
-static pthread_once_t once_flag = PTHREAD_ONCE_INIT;
 
 // Mutex when global get central cache
 static pthread_mutex_t mutex;
@@ -26,8 +25,8 @@ static pthread_mutex_t mutex;
 /*
   function
 */
-// For thread_once
-static void once_func(void);
+// Global initialize
+static void init_before_main(void) __attribute__((constructor));
 
 // Initialze for a new thread
 static struct thread_cache *thread_init(void);

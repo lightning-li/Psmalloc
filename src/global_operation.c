@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <stdio.h>
 
-static void once_func(void)
+void init_before_main(void)
 {
         // mutex initialize
         pthread_mutex_init(&mutex, NULL);
@@ -14,10 +14,12 @@ static void once_func(void)
         // Allocation for central and thread struct
         central_slab = sbrk(central_slab_size);
         thread_slab  = sbrk(thread_slab_size);
+        global_add_central();
         pthread_mutex_unlock(&mutex);
+        printf("init complete\n");
 }
 
-static struct thread_cache *thread_init(void)
+struct thread_cache *thread_init(void)
 {
         struct central_cache *cc = NULL;
         struct thread_cache *tc  = NULL;
@@ -43,7 +45,7 @@ static struct thread_cache *thread_init(void)
         return tc;
 }
 
-static void central_renew(struct central_cache *cc)
+void central_renew(struct central_cache *cc)
 {
         int index;
 
@@ -53,7 +55,7 @@ static void central_renew(struct central_cache *cc)
         cc->free_chunk->next = NULL;
 }
 
-static void global_add_central(void)
+void global_add_central(void)
 {
         void *ptr = NULL;
         char index = 0;
@@ -104,9 +106,7 @@ struct thread_cache *get_current_thread(void)
 {
         struct thread_cache *tc = NULL;
 
-        // Initialize when the first thread come in
-        pthread_once(&once_flag, once_func);
-
+        printf("in get thread\n");
         tc = pthread_getspecific(tkey);
         if (tc == NULL)
                 tc = thread_init();

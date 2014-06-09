@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 void init_before_main(void)
 {
@@ -16,7 +17,6 @@ void init_before_main(void)
         thread_slab  = sbrk(thread_slab_size);
         global_add_central();
         pthread_mutex_unlock(&mutex);
-        printf("init complete\n");
 }
 
 struct thread_cache *thread_init(void)
@@ -25,6 +25,7 @@ struct thread_cache *thread_init(void)
         struct thread_cache *tc  = NULL;
 
         pthread_mutex_lock(&mutex);
+        printf("start\n");
         // Check if there is free central cache
         if (free_central == NULL)
                 global_add_central();
@@ -35,7 +36,7 @@ struct thread_cache *thread_init(void)
         // Get first free central cache
         free_central = (cc = free_central)->next;
         pthread_setspecific(tkey, tc);
-        
+
         pthread_mutex_unlock(&mutex);
 
         central_renew(cc);
@@ -52,13 +53,14 @@ void central_renew(struct central_cache *cc)
         cc->next = NULL;
         cc->free_chunk = cc->start;
         cc->free_chunk->seek = central_cache_size;
+        printf("end\n");
+        sleep(1);
         cc->free_chunk->next = NULL;
 }
 
 void global_add_central(void)
 {
-        void *ptr = NULL;
-        char index = 0;
+        char index = 1;
         struct central_cache *cc = NULL;
 
         free_central = central_slab++;
@@ -67,7 +69,8 @@ void global_add_central(void)
         // Initialize four central caches
         while(1) {
                 cc->start = sbrk(central_cache_size);
-                if (index == (num_of_init_central-1))
+                printf("central %zu\n", cc->start);
+                if (index == num_of_init_central)
                         break;
                 cc->next = central_slab++;
                 cc = cc->next;
@@ -82,7 +85,6 @@ void thread_add_central(struct thread_cache *tc)
         struct central_cache *new_cc = NULL;
 
         pthread_mutex_lock(&mutex);
-        
         // Check if there is free central cache
         if (free_central == NULL)
                 global_add_central();
@@ -106,11 +108,10 @@ struct thread_cache *get_current_thread(void)
 {
         struct thread_cache *tc = NULL;
 
-        printf("in get thread\n");
         tc = pthread_getspecific(tkey);
         if (tc == NULL)
                 tc = thread_init();
-
+        
         return tc;
 }
 

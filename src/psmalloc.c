@@ -4,6 +4,7 @@
 #include "heap_hook.h"
 #include "mmap_hook.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 void *ps_malloc(size_t size)
 {

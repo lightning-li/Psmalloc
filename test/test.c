@@ -1,23 +1,27 @@
 #include <stdio.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <sys/mman.h>
+#include <pthread.h>
 #include <psmalloc.h>
 #include "common.h"
 
-#define test(x) (#x)
+void thread_func(void)
+{
+        struct chunk_head *ch = NULL;
+        void *p = ps_malloc(200);
+        printf("thread: %zu\n", (p - chunk_head_size));
+}
 
 int main(void)
 {
-        struct chunk_head *ch;
-        size_t size = sizeof(struct chunk_head);
-        void *p = ps_calloc(10, 9);
-        
+        const int num = 4;
+        int i = 0;
+        pthread_t tid[num];
 
-        ch = p - size;
-        printf("%zu\nkind = %d\nnum = %d\nseek = %zu\nnext = %x\n", (p-size), ch->kind, ch->num, ch->seek, ch->next);
-        ps_free(p);
-        printf("%zu\nkind = %d\nnum = %d\nseek = %zu\nnext = %x\n", (p-size), ch->kind, ch->num, ch->seek, ch->next);
+        for (; i<num; ++i) {
+                pthread_create(&tid[i], NULL, (void*)thread_func, NULL);
+        }
+
+        for (i=0; i<num; ++i)
+                pthread_join(tid[i], NULL);
         
         return 0;
 }

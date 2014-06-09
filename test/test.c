@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <time.h>
+#include <malloc.h>
 #include <psmalloc.h>
 #include "common.h"
 

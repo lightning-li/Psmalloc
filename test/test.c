@@ -4,7 +4,7 @@
 #include <psmalloc.h>
 #include "common.h"
 
-void thread_func(void)
+void ps_func(void)
 {
         const int num = 10;
         int i = 0;
@@ -23,6 +23,25 @@ void thread_func(void)
         pthread_exit(0);
 }
 
+void tc_func(void)
+{
+        const int num = 10;
+        int i = 0;
+        void *p[num];
+        struct chunk_head *ch = NULL;
+        
+        for (i=0; i<num; ++i)
+                p[i] = malloc(i*i*100 + 100);
+
+        for (i=0; i<num; ++i)
+                p[i] = realloc(p[i], i*i*100 + 400);
+
+        for (i=0; i<num; ++i)
+                free(p[i]);
+
+        pthread_exit(0);
+}
+
 int main(void)
 {
         const int num = 32;
@@ -33,7 +52,7 @@ int main(void)
 
         c1 = clock();
         for (; i<num; ++i) {
-                pthread_create(&tid[i], NULL, (void*)thread_func, NULL);
+                pthread_create(&tid[i], NULL, (void*)ps_func, NULL);
         }
 
         for (i=0; i<num; ++i)

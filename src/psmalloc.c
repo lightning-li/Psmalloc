@@ -43,7 +43,6 @@ void *ps_realloc(void *ptr, size_t size)
         void *ret = NULL;
         struct thread_cache *current_thread = get_current_thread();
 
-        current_thread->count++;
         if (size < critical_size) {
                 ret = chunk_realloc_hook(current_thread, ptr, size);
         } else {
@@ -57,7 +56,6 @@ void ps_free(void *ptr)
         struct central_cache *cc = NULL;
         struct thread_cache *current_thread = get_current_thread();
         current_thread->count--;
-        printf("count %zu\n", current_thread->count);
         
         cc = find_central_of_pointer(current_thread, ptr);
         if (cc != NULL)

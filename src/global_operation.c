@@ -62,7 +62,7 @@ void global_add_central(void)
 
         free_central = central_slab++;
         cc = free_central;
-                
+
         // Initialize four central caches
         while(1) {
                 cc->start = sbrk(central_cache_size);

@@ -25,7 +25,6 @@ struct thread_cache *thread_init(void)
         struct thread_cache *tc  = NULL;
 
         pthread_mutex_lock(&mutex);
-        printf("start\n");
         // Check if there is free central cache
         if (free_central == NULL)
                 global_add_central();
@@ -53,8 +52,6 @@ void central_renew(struct central_cache *cc)
         cc->next = NULL;
         cc->free_chunk = cc->start;
         cc->free_chunk->seek = central_cache_size;
-        printf("end\n");
-        sleep(1);
         cc->free_chunk->next = NULL;
 }
 
@@ -69,7 +66,6 @@ void global_add_central(void)
         // Initialize four central caches
         while(1) {
                 cc->start = sbrk(central_cache_size);
-                printf("central %zu\n", cc->start);
                 if (index == num_of_init_central)
                         break;
                 cc->next = central_slab++;
@@ -122,12 +118,14 @@ void check_thread_use(struct thread_cache *tc)
         if (tc->count != 0)
                 return;
 
+        pthread_mutex_lock(&mutex);
         // Add all central caches in thread to free central
         cc = tc->cc;
         while (cc->next!=NULL)
                 cc = cc->next;
         cc->next = free_central;
         free_central = tc->cc;
+        pthread_mutex_unlock(&mutex);
 
         tc->cc = NULL;
 }

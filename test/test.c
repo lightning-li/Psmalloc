@@ -7,38 +7,58 @@
 
 void ps_func(void)
 {
-        const int num = 10;
+        const int num = 40;
         int i = 0;
-        void *p[num];
+        void *p1[num];
+        void *p2[num];
         struct chunk_head *ch = NULL;
+
+        for (i=0; i<num; ++i)
+                p1[i] = ps_malloc(i*i*100 + 100);
+
+        for (i=0; i<num; ++i)
+                p1[i] = ps_realloc(p1[i], i*i*100 + 400);
+
+        for (i=0; i<num; ++i)
+                p2[i] = ps_malloc(i*i*100 + 100);
+
+        for (i=0; i<num; ++i)
+                ps_free(p1[i]);
+
+        for (i=0; i<num; ++i)
+                p2[i] = ps_realloc(p2[i], i*i*100 + 400);
+
+        for (i=0; i<num; ++i)
+                ps_free(p2[i]);
         
-        for (i=0; i<num; ++i)
-                p[i] = ps_malloc(i*i*100 + 100);
-
-        for (i=0; i<num; ++i)
-                p[i] = ps_realloc(p[i], i*i*100 + 400);
-
-        for (i=0; i<num; ++i)
-                ps_free(p[i]);
-
         pthread_exit(0);
 }
 
 void tc_func(void)
 {
-        const int num = 10;
+        const int num = 40;
         int i = 0;
-        void *p[num];
+        void *p1[num];
+        void *p2[num];
         struct chunk_head *ch = NULL;
         
         for (i=0; i<num; ++i)
-                p[i] = malloc(i*i*100 + 100);
+                p1[i] = malloc(i*i*100 + 100);
 
         for (i=0; i<num; ++i)
-                p[i] = realloc(p[i], i*i*100 + 400);
+                p1[i] = realloc(p1[i], i*i*100 + 400);
 
         for (i=0; i<num; ++i)
-                free(p[i]);
+                p2[i] = malloc(i*i*100 + 100);
+
+        for (i=0; i<num; ++i)
+                free(p1[i]);
+
+        for (i=0; i<num; ++i)
+                p2[i] = realloc(p2[i], i*i*100 + 400);
+
+        for (i=0; i<num; ++i)
+                free(p2[i]);
 
         pthread_exit(0);
 }
@@ -53,7 +73,7 @@ int main(void)
 
         c1 = clock();
         for (; i<num; ++i) {
-                pthread_create(&tid[i], NULL, (void*)ps_func, NULL);
+                pthread_create(&tid[i], NULL, (void*)tc_func, NULL);
         }
 
         for (i=0; i<num; ++i)

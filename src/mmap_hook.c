@@ -1,5 +1,4 @@
 #include "mmap_hook.h"
-#include "common.h"
 #include "global_operation.h"
 #include "heap_hook.h"
 #include <sys/mman.h>

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <psmalloc.h>
-#include "common.h"
+#include "core_conf.h"
 
 
 int main(void)

@@ -1,7 +1,7 @@
 #ifndef PSMALLOC_HEAP_HOOK_H_
 #define PSMALLOC_HEAP_HOOK_H_
 
-#include "common.h"
+#include "core_conf.h"
 
 void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag);
 void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size);

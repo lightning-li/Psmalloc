@@ -1,5 +1,5 @@
 #include "psmalloc.h"
-#include "common.h"
+#include "core_conf.h"
 #include "global_operation.h"
 #include "heap_hook.h"
 #include "mmap_hook.h"

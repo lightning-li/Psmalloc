@@ -1,7 +1,7 @@
 #ifndef PSMALLOC_GLOBAL_OPERATION_H_
 #define PSMALLOC_GLOBAL_OPERATION_H_
 
-#include "common.h"
+#include "core_conf.h"
 #include <pthread.h>          // for pthread_key_t
 
 /*

@@ -6,8 +6,8 @@
   **************************************************
 */
 
-#ifndef PSMALLOC_COMMON_H_
-#define PSMALLOC_COMMON_H_
+#ifndef PSMALLOC_CORE_CONF_H_
+#define PSMALLOC_CORE_CONF_H_
 
 #include <stddef.h>           // for size_t
 #include <stdint.h>           // for uint32_t

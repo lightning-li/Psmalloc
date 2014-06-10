@@ -3,7 +3,7 @@
 #include <time.h>
 #include <malloc.h>
 #include <psmalloc.h>
-#include "common.h"
+#include "core_conf.h"
 
 void tc_func(void)
 {
@@ -64,7 +64,7 @@ void ps_func(void)
 
 int main(void)
 {
-        const int num = 10;
+        const int num = 20;
         int i = 0;
         pthread_t tid[num];
         time_t timer1, timer2;

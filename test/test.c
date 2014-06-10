@@ -74,7 +74,7 @@ int main(void)
         for (; i<num; ++i) {
                 pthread_create(&tid[i], NULL, (void*)ps_func, NULL);
         }
-
+        
         for (i=0; i<num; ++i)
                 pthread_join(tid[i], NULL);
         c2 = clock();

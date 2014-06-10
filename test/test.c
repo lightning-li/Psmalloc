@@ -53,19 +53,18 @@ void ps_func(void)
 
         for (i=0; i<num; ++i)
                 ps_free(p1[i]);
-
+        
         for (i=0; i<num; ++i)
                 p2[i] = ps_realloc(p2[i], i*i*100 + 400);
-
+        
         for (i=0; i<num; ++i)
                 ps_free(p2[i]);
-        
-        pthread_exit(0);
+
 }
 
 int main(void)
 {
-        const int num = 40;
+        const int num = 10;
         int i = 0;
         pthread_t tid[num];
         time_t timer1, timer2;

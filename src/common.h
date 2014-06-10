@@ -57,6 +57,7 @@ static const int max_free_chunk = 1024*1024 / 128;
 // Struct for central cache
 struct central_cache {
         void                 *start;
+        void                 *end;
         struct chunk_head    *free_chunk;
         struct central_cache *next;
 };

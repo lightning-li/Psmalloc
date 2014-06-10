@@ -51,7 +51,7 @@ void *mmap_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
         tc->mm = new_mm;
         
         // Release old
-        if (old_mm > sbrk(0))    // Old pointer is in mmap
+        if ((size_t)old_mm > sbrk(0))    // Old pointer is in mmap
                 do_mmap_free(tc, old_mm);
         else                     // Old pointer is in heap
                 do_chunk_free(find_central_of_pointer(tc, old_mm), old_mm);

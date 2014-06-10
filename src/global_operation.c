@@ -23,7 +23,6 @@ struct thread_cache *thread_init(void)
 {
         struct central_cache *cc = NULL;
         struct thread_cache *tc  = NULL;
-
         pthread_mutex_lock(&mutex);
         // Check if there is free central cache
         if (free_central == NULL)
@@ -51,7 +50,7 @@ void central_renew(struct central_cache *cc)
 
         cc->next = NULL;
         cc->free_chunk = cc->start;
-        cc->free_chunk->seek = central_cache_size;
+        cc->free_chunk->num = max_free_chunk;
         cc->free_chunk->next = NULL;
 }
 
@@ -79,7 +78,7 @@ void thread_add_central(struct thread_cache *tc)
 {
         struct central_cache *old_cc = NULL;
         struct central_cache *new_cc = NULL;
-
+        printf("add central\n");
         pthread_mutex_lock(&mutex);
         // Check if there is free central cache
         if (free_central == NULL)

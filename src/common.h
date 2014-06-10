@@ -10,6 +10,7 @@
 #define PSMALLOC_COMMON_H_
 
 #include <stddef.h>           // for size_t
+#include <stdint.h>           // for uint32_t
 
 
 /*
@@ -36,11 +37,16 @@ enum chunk_kind {
 };
 
 // Size of four kinds of chunk in each thread
-static const size_t chunk_size[] = {128,             // tiny chunk
-                                    512,             // small chunk
-                                    1024*2,          // medium chunk
-                                    1024*8,          // big chunk
-                                    1024*32};        // huge chunk
+static const uint32_t chunk_size[] = {128,             // tiny chunk
+                                      512,             // small chunk
+                                      1024*2,          // medium chunk
+                                      1024*8,          // big chunk
+                                      1024*32};        // huge chunk
+
+static const uint32_t chunk_trans[] = {1, 4, 16, 64, 256};  // when kind trans to tiny
+
+// Max number of free chunk in a central cache
+static const int max_free_chunk = 1024*1024 / 128;
 
 /*
   **************************************************
@@ -65,10 +71,10 @@ struct thread_cache {
 
 // Each chunk has a chunk_head at the beginning
 struct chunk_head {
-        enum chunk_kind      kind;
-        int                  num;      // 1, 2, 3
-        size_t               seek;
-        struct chunk_head    *next;
+        enum chunk_kind   kind;
+        uint32_t          num;      // 1, 2, 3
+        size_t            seek;
+        struct chunk_head *next;
 };
 
 static const size_t chunk_head_size = sizeof(struct chunk_head);

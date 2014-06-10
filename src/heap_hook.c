@@ -1,6 +1,7 @@
 #include "heap_hook.h"
 #include "global_operation.h"
 #include <string.h>
+#include <stdint.h>
 #include <stdio.h>
 
 void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag)
@@ -8,7 +9,7 @@ void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag)
         void *ret = NULL;
         struct chunk_head *ch = NULL;
         enum chunk_kind kind;
-        int num = check_size(size, &kind);
+        uint32_t num = check_size(size, &kind);
 
         ch = get_suitable_chunk(tc, kind, num, NULL);
         ch->seek = size;
@@ -26,7 +27,7 @@ void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
         struct chunk_head *new_ch = NULL;
         size_t old_size = old_ch->seek;
         enum chunk_kind kind;
-        int num = check_size(size, &kind);
+        uint32_t num = check_size(size, &kind);
 
         new_ch = get_suitable_chunk(tc, kind, num, old_ch);
         // Same address
@@ -56,7 +57,7 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
 {
         struct chunk_head *prev_ch = cc->free_chunk;
         struct chunk_head *next_ch = prev_ch;
-        size_t ch_size = chunk_size[ch->kind] * ch->num;
+        uint32_t ti_num = chunk_trans[ch->kind] * ch->num;
         
         for (; next_ch!=NULL; prev_ch=next_ch, next_ch=next_ch->next) {
                 if (next_ch > ch)
@@ -67,21 +68,21 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
         // Piece front
         if (next_ch == cc->free_chunk) {
                 cc->free_chunk = ch;
-                ch->seek = ch_size;
+                ch->num = ti_num;
         } else {
-                if (((void*)prev_ch + prev_ch->seek + 1) == ch) {
+                if (((void*)prev_ch + prev_ch->seek) == ch) {
                         ch = prev_ch;
-                        ch->seek += ch_size;
+                        ch->num += ti_num;
                 } else {
                         prev_ch->next = ch;
-                        ch->seek = ch_size;
+                        ch->num = ti_num;
                 }
         }
 
         // Piece behind
         if (next_ch != NULL) {
                 if (((void*)ch + ch->seek) == next_ch) {
-                        ch->seek += next_ch->seek;
+                        ch->num += next_ch->num;
                         ch->next = next_ch->next;
                 } else {
                         ch->next = next_ch;
@@ -89,7 +90,7 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
          }
 }
 
-static int check_size(size_t size, enum chunk_kind *kind)
+static uint32_t check_size(size_t size, enum chunk_kind *kind)
 {
         int index;
         for (index=0; index<4; ++index) {
@@ -105,12 +106,13 @@ static int check_size(size_t size, enum chunk_kind *kind)
 
 static void *get_suitable_chunk(struct thread_cache *tc,
                                 enum chunk_kind kind,
-                                int num, struct chunk_head *old_ch)
+                                uint32_t num, struct chunk_head *old_ch)
 {
         struct chunk_head *ch = NULL;
         struct chunk_head *prev_ch = NULL;
         struct central_cache *cc = NULL;
-        size_t target_size = chunk_size[kind] * num;
+        uint32_t target_ti_num = chunk_trans[kind] * num;
+        int index;
 
         // realloc
         if (old_ch != NULL) {
@@ -119,7 +121,8 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                         if (old_ch->num == num) {           // Same num
                                 return old_ch;
                         } else if (old_ch->num > num) {     // Less num
-                                ch = (void*)old_ch + target_size;
+                                ch = (void*)old_ch +
+                                        target_ti_num*chunk_size[0];
                                 ch->kind = kind;
                                 ch->num = old_ch->num - num;
                                 do_chunk_free(cc,ch);
@@ -130,9 +133,8 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                         } else {                            // More num
                                 // Check if it is free behind old chunk
                                 ch = get_appoint_chunk(cc,
-                                                       target_size - 
-                                                       chunk_size[kind] *
-                                                       old_ch->num,
+                                                       chunk_trans[kind] *
+                                                       (num - old_ch->num),
                                                        (void*)old_ch +
                                                        chunk_size[kind] *
                                                        old_ch->num);
@@ -143,28 +145,17 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                         }
                 } else if (old_ch->kind > kind) {               // Smaller kind
                         // Turn to new kind
-                        old_ch->num = old_ch->num*4;
+                        for (index=kind; index>old_ch->kind; --index)
+                                old_ch->num *= 4;
                         old_ch->kind = kind;
 
-                        ch = (void*)old_ch + target_size;
+                        ch = (void*)old_ch + target_ti_num*chunk_size[0];
                         ch->kind = kind;
                         ch->num = old_ch->num - num;
                         do_chunk_free(cc, ch);
 
                         old_ch->num = num;
                         return old_ch;
-                } else {                                        // Bigger kind
-                        ch = get_appoint_chunk(cc,
-                                            target_size -
-                                            chunk_size[old_ch->kind]*
-                                            old_ch->num,
-                                            (void*)old_ch +
-                                            chunk_size[old_ch->kind] *
-                                            old_ch->num);
-                        if (ch != NULL) {
-                                old_ch->kind = kind;
-                                old_ch->num = num;
-                        }
                 }
         }
 
@@ -177,28 +168,27 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                 prev_ch = cc->free_chunk;
                 // Find in free chunks
                 for (; ch != NULL; prev_ch=ch, ch=ch->next) {
-                        if (ch->seek >= target_size)
+                        if (ch->num >= target_ti_num)
                                 break;
                 }
                 if (ch != NULL)
                         break;
-                if (cc->next == NULL)
+                if (cc->next == NULL){
                         thread_add_central(tc);
+                }
                 cc = cc->next;
         }
 
-        // Initialize target chunk
-        ch->kind = kind;
-        ch->num = num;
-
         // If the size of target chunk is bigger than need
-        if (ch->seek != target_size) {          
+        if (ch->num != target_ti_num) {
                 if (prev_ch == cc->free_chunk) {
-                        cc->free_chunk = (void*)ch + target_size;
-                        cc->free_chunk->seek = ch->seek - target_size;
+                        cc->free_chunk = (void*)ch +
+                                target_ti_num * chunk_size[0];
+                        cc->free_chunk->num = ch->num - target_ti_num;
                 } else {
-                        prev_ch->next = (void*)ch + target_size;
-                        prev_ch->next->seek = ch->seek - target_size;
+                        prev_ch->next = (void*)ch +
+                                target_ti_num * chunk_size[0];
+                        prev_ch->next->num = ch->num - target_ti_num;
                 }
         } else {
                 if (prev_ch == cc->free_chunk)
@@ -206,18 +196,22 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                 else
                         prev_ch->next = ch->next;
         }
+
+        // Initialize final target chunk
+        ch->kind = kind;
+        ch->num = num;
         return ch;
 }
 
 static void *get_appoint_chunk(struct central_cache *cc,
-                               size_t size, void *ptr)
+                               uint32_t ti_num, void *ptr)
 {
         struct chunk_head *ch = cc->free_chunk;
         struct chunk_head *prev_ch = ch;
 
         // Search in free chunk
         for(; ch!=NULL; prev_ch=ch, ch=ch->next) {
-                if (ch==ptr && ch->seek>=size)
+                if (ch==ptr && ch->num>=ti_num)
                         break;
         }
 
@@ -226,13 +220,13 @@ static void *get_appoint_chunk(struct central_cache *cc,
                 return ch;
 
         // If the size of target chunk is bigger than need
-        if (ch->seek != size) {
+        if (ch->num != ti_num) {
                 if (prev_ch == cc->free_chunk) {
-                        cc->free_chunk = (void*)ch + size;
-                        cc->free_chunk->seek = ch->seek - size;
+                        cc->free_chunk = (void*)ch + ti_num*chunk_size[0];
+                        cc->free_chunk->num = ch->num - ti_num;
                 } else {
-                        prev_ch->next = (void*)ch + size;
-                        prev_ch->next->seek = ch->seek - size;
+                        prev_ch->next = (void*)ch + ti_num*chunk_size[0];
+                        prev_ch->next->num = ch->num - ti_num;
                 }
         } else {
                 if (prev_ch == cc->free_chunk)

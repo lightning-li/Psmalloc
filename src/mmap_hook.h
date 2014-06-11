@@ -2,7 +2,7 @@
 #define PSMALLOC_MMAP_HOOK_H_
 
 #include <stddef.h>        // for size_t
-#include "core_conf.h"
+#include "core_config.h"
 
 void *mmap_alloc_hook(struct thread_cache *tc, size_t size, int flag);
 void *mmap_realloc_hook(struct thread_cache *tc, void *ptr, size_t size);

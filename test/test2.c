@@ -1,13 +1,19 @@
 #include <stdio.h>
-#include <psmalloc.h>
-#include "core_conf.h"
-
+#include <pthread.h>
+#include "core_config.h"
+void func(void) {
+        void *p = malloc(100);
+        free(p);
+        pthread_exit(0);
+}
 
 int main(void)
 {
         void *p[10];
         struct chunk_head *ch = NULL;
-        
+        printf("sta sbrk %p\n", sbrk(0));
+        pthread_t pt;
+        /*
         p[0] = ps_malloc(200);
         ch = p[0] - chunk_head_size;
         printf("0 u\n %p\n %d\n %d\n %p\n", ch, ch->kind, ch->num, ch->seek);
@@ -29,4 +35,10 @@ int main(void)
         ps_free(p[1]);
         ch = p[0] - chunk_head_size;
         printf("3 u\n %p\n %d\n %d\n %p\n", ch, ch->kind, ch->num, ch->seek);
+        */
+        pthread_create(&pt, NULL, (void*)func, NULL);
+        pthread_join(pt, NULL);
+        printf("end sbrk %p\n", sbrk(0));
+
+        return 0;
 }

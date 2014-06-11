@@ -1,8 +1,9 @@
 #include "psmalloc.h"
-#include "core_conf.h"
+#include "core_config.h"
 #include "global_operation.h"
 #include "heap_hook.h"
 #include "mmap_hook.h"
+#include "libc_override.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -10,7 +11,7 @@ void *ps_malloc(size_t size)
 {
         void *ret = NULL;
         struct thread_cache *current_thread = get_current_thread();
-
+        
         if (size < critical_size) {
                 // Third argument is zero
                 // Bytes in chunk will not be initialized 
@@ -64,5 +65,6 @@ void ps_free(void *ptr)
         current_thread->count--;
 
         // Check if this thread till be used
-        check_thread_use(current_thread);
+        check_thread_use(current_thread, 0);
+        printf("free %-3zu, %p\n", current_thread->count, current_thread);
 }

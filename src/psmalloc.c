@@ -3,7 +3,6 @@
 #include "global_operation.h"
 #include "heap_hook.h"
 #include "mmap_hook.h"
-#include "libc_override.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -54,17 +53,24 @@ void *ps_realloc(void *ptr, size_t size)
 
 void ps_free(void *ptr)
 {
+        pthread_mutex_lock(&mtx);
+        //        printf("ps_free   start\n");
         struct central_cache *cc = NULL;
         struct thread_cache *current_thread = get_current_thread();
-
+        //        printf("ps_free   middle: %zu\n", current_thread->count);        
         cc = find_central_of_pointer(current_thread, ptr);
+
+        //        printf("ps_free   middle  sec\n");
         if (cc != NULL)
                 do_chunk_free(cc, ptr - chunk_head_size);
         else
                 do_mmap_free(current_thread, ptr - chunk_head_size);
+
+        //        printf("ps_free   middle  thi\n");
         current_thread->count--;
 
         // Check if this thread till be used
         check_thread_use(current_thread, 0);
-        printf("free %-3zu, %p\n", current_thread->count, current_thread);
+        //        printf("ps_free   end\n");
+        pthread_mutex_unlock(&mtx);
 }

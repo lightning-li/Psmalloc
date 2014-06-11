@@ -21,6 +21,7 @@ static pthread_key_t tkey;
 
 // Mutex when global get central cache
 static pthread_mutex_t mutex;
+static pthread_mutex_t mtx;
 
 /*
   function
@@ -32,7 +33,7 @@ static void init_before_main(void) __attribute__((constructor));
 static struct thread_cache *thread_init(void);
 
 // When thread exit
-static void thread_destructor(struct thread_cache *tc);
+static void thread_destructor(void *ptr);
 
 // When a central begin to use
 static void central_renew(struct central_cache* cc);

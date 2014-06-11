@@ -21,7 +21,7 @@ static void *get_suitable_chunk(struct thread_cache *tc,
 
 // If the appoint place is free and size is enough, then return it
 static void *get_appoint_chunk(struct central_cache *cc,
-                               size_t size,
+                               size_t tar_size,
                                void *ptr);
 
 #endif

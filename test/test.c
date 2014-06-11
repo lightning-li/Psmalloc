@@ -1,64 +1,44 @@
 #include <stdio.h>
 #include <pthread.h>
-#include <time.h>
-#include <malloc.h>
-#include <psmalloc.h>
 #include "core_config.h"
-
-void func(void)
-{
-        const int num = 20;
-        int i = 0;
-        void *p1[num];
-        void *p2[num];
-        struct chunk_head *ch = NULL;
-        
-        for (i=0; i<num; ++i)
-                p1[i] = malloc(i*i*100 + 100);
-
-        printf("111\n");
-        for (i=0; i<num; ++i)
-                p1[i] = realloc(p1[i], i*i*100 + 400);
-
-        printf("222\n");
-        for (i=0; i<num; ++i)
-                p2[i] = malloc(i*i*100 + 100);
-
-        printf("333\n");
-        for (i=0; i<num; ++i)
-                free(p1[i]);
-
-        printf("444\n");
-        for (i=0; i<num; ++i)
-                p2[i] = realloc(p2[i], i*i*100 + 400);
-
-        printf("555\n");
-        for (i=0; i<num; ++i)
-                free(p2[i]);
-
-        printf("666\n");
+void func(void) {
+        void *p = ps_malloc(100);
+        ps_free(p);
         pthread_exit(0);
 }
 
 int main(void)
 {
-        const int num = 1;
-        int i = 0;
-        pthread_t tid[num];
-        time_t timer1, timer2;
-        clock_t c1, c2;
+        void *p[10];
+        struct chunk_head *ch = NULL;
+        printf("sta sbrk %p\n", sbrk(0));
+        pthread_t pt;
+        /*
+        p[0] = ps_malloc(200);
+        ch = p[0] - chunk_head_size;
+        printf("0 u\n %p\n %d\n %d\n %p\n", ch, ch->kind, ch->num, ch->seek);
+        ch = (void*)ch + chunk_size[ch->kind] * ch->num;
+        printf("0 f\n %p\n %d\n %d\n %p\n", ch, ch->kind, ch->num, ch->seek);
 
-        c1 = clock();
-        for (; i<num; ++i) {
-                pthread_create(&tid[i], NULL, (void*)func, NULL);
-        }
-        
-        for (i=0; i<num; ++i)
-                pthread_join(tid[i], NULL);
-        c2 = clock();
-        printf("time: %e\n", (double)(c2-c1));
-        printf("sbrk: %p\n", sbrk(0));
+        p[1] = ps_calloc(20, 40);
+        ch = p[1] - chunk_head_size;
+        printf("1 u\n %p\n %d\n %d\n %p\n", ch, ch->kind, ch->num, ch->seek);
+        ch = (void*)ch + chunk_size[ch->kind] * ch->num;
+        printf("1 f\n %p\n %d\n %d\n %p\n", ch, ch->kind, ch->num, ch->seek);
 
-        
+        ps_free(p[0]);
+        ch = p[0] - chunk_head_size;
+        printf("2 u\n %p\n %d\n %d\n %p\n", ch, ch->kind, ch->num, ch->seek);
+        ch = (void*)ch + chunk_size[ch->kind] * ch->num;
+        printf("2 f\n %p\n %d\n %d\n %p\n", ch, ch->kind, ch->num, ch->seek);
+
+        ps_free(p[1]);
+        ch = p[0] - chunk_head_size;
+        printf("3 u\n %p\n %d\n %d\n %p\n", ch, ch->kind, ch->num, ch->seek);
+        */
+        pthread_create(&pt, NULL, (void*)func, NULL);
+        pthread_join(pt, NULL);
+        printf("end sbrk %p\n", sbrk(0));
+
         return 0;
 }

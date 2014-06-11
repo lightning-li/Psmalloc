@@ -18,6 +18,7 @@ void *chunk_alloc_hook(struct thread_cache *tc, size_t size, int flag)
         // calloc
         if (flag)
                 memset(ret, 0, size);
+
         return ret;
 }
 
@@ -47,9 +48,11 @@ struct central_cache *find_central_of_pointer(struct thread_cache *tc,
                                               void *ptr)
 {
         struct central_cache *cc = tc->cc;
-        for (; cc!=NULL; cc=cc->next)
+        do {
                 if (ptr>=cc && ptr<(void*)cc+central_cache_size)
                         break;
+                cc = cc->next;
+        } while (cc != tc->cc);
         return cc;
 }
 
@@ -157,7 +160,7 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                 thread_add_central(tc);
         cc = tc->cc;
         // Find in central caches
-        while (1) {
+        while(1) {
                 ch = cc->free_chunk;
                 prev_ch = cc->free_chunk;
                 // Find in free chunks
@@ -167,7 +170,7 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                 }
                 if (ch != NULL)
                         break;
-                if (cc->next == NULL){
+                if (cc->next == tc->cc){
                         thread_add_central(tc);
                 }
                 cc = cc->next;

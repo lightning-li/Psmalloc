@@ -29,6 +29,7 @@ struct thread_cache {
 /* Each central has a central_cache at the beginning */
 struct central_cache {
         struct chunk_head    *free_chunk;
+        struct central_cache *prev;
         struct central_cache *next;
 };
 
@@ -50,7 +51,7 @@ struct chunk_head {
 static const size_t chunk_head_size = sizeof(struct chunk_head);
 
 /* Size of slab for central and thread struct */
-static const size_t thread_slab_size    = 1000 * sizeof(struct thread_cache);
+static const size_t thread_slab_size    = 2000 * sizeof(struct thread_cache);
 
 /* Size of each central cache */
 static const size_t central_cache_size  = 1024*512;  // 512 KB

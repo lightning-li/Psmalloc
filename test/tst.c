@@ -7,7 +7,7 @@
 
 void func(void)
 {
-        const int num = 15;
+        const int num = 20;
         int i = 0;
         void *p1[num];
         void *p2[num];

@@ -7,7 +7,7 @@
 
 void func(void)
 {
-        const int num = 20;
+        const int num = 15;
         int i = 0;
         void *p1[num];
         void *p2[num];
@@ -36,7 +36,7 @@ void func(void)
 
 int main(void)
 {
-        const int num = 1000;
+        const int num = 1500;
         int i = 0;
         pthread_t tid[num];
         time_t timer1, timer2;

@@ -2,8 +2,22 @@
 #include <pthread.h>
 #include "core_config.h"
 void func(void) {
-        void *p = ps_malloc(100);
-        ps_free(p);
+        struct chunk_head *ch, *old_ch;
+        int i;
+        void *p[10];
+
+        for (i=0; i<10; ++i)
+                p[i] = ps_malloc(i*i + 100);
+
+        for (i=0; i<10; ++i)
+                p[i] = ps_realloc(p[i], i*i + 99);
+
+        for (i=0; i<10; ++i)
+                ps_free(p[i]);
+
+        ch = p[0] - chunk_head_size;
+        printf("%p, %d, %d, %zu\n", ch, ch->kind, ch->num, ch->seek);
+
         pthread_exit(0);
 }
 

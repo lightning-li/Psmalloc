@@ -29,10 +29,9 @@ void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
         struct chunk_head *new_ch = NULL;
         uint8_t kind;
         uint8_t num = check_size(size, &kind);
-
-        new_ch = get_suitable_chunk(tc, kind, num, old_ch);
         
-        if (new_ch == old_ch) {     // Same address
+        new_ch = get_suitable_chunk(tc, kind, num, old_ch);
+        if (new_ch == old_ch) {
                 ret = ptr;
         } else {
                 ret = new_ch + 1;
@@ -61,7 +60,7 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
         struct chunk_head *prev_ch = cc->free_chunk;
         struct chunk_head *next_ch = prev_ch;
         ch->seek = chunk_size[ch->kind] * ch->num;
-
+        
         for (; next_ch!=NULL; prev_ch=next_ch, next_ch=next_ch->next) {
                 if (next_ch > ch)
                         break;
@@ -134,7 +133,9 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                                                        tar_size -
                                                        chunk_size[kind] *
                                                        old_ch->num,
-                                                       (void*)old_ch + tar_size);
+                                                       (void*)old_ch +
+                                                       old_ch->num *
+                                                       chunk_size[kind]);
                                 if (ch != NULL) {
                                         old_ch->num = num;
                                         return old_ch;

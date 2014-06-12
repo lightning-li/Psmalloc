@@ -29,6 +29,7 @@ struct thread_cache {
 /* Each central has a central_cache at the beginning */
 struct central_cache {
         struct chunk_head    *free_chunk;
+        struct central_cache *prev;
         struct central_cache *next;
 };
 
@@ -50,7 +51,7 @@ struct chunk_head {
 static const size_t chunk_head_size = sizeof(struct chunk_head);
 
 /* Size of slab for central and thread struct */
-static const size_t thread_slab_size    = 1000 * sizeof(struct thread_cache);
+static const size_t thread_slab_size    = 2000 * sizeof(struct thread_cache);
 
 /* Size of each central cache */
 static const size_t central_cache_size  = 1024*512;  // 512 KB
@@ -62,16 +63,16 @@ static const size_t num_of_add_central = 4;
 static const uint8_t num_of_kinds = 6;
 
 /* Size of four kinds of chunk in each thread */
-static const size_t chunk_size[] = {32,         // 32 Bytes
-                                    128,        // 128 Bytes
-                                    512,        // 512 Bytes
-                                    1024*2,     // 2 KB
-                                    1024*8,     // 8 KB
-                                    1024*32};   // 32 KB
+static const size_t chunk_size[] = {64,          // 64 Bytes
+                                    256,         // 256 Bytes
+                                    1024,        // 1 KB
+                                    1024*4,      // 4 KB
+                                    1024*16,     // 16 KB
+                                    1024*64};    // 64 KB
 
 /* Critical size
    Allocation more than this size should use mmap */
-static const size_t critical_size = 1024*512 - 1024*32;
+static const size_t critical_size = 1024*512 - 1024*64;
 
 
 #endif

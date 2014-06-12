@@ -3,6 +3,7 @@
 #include "global_operation.h"
 #include "heap_hook.h"
 #include "mmap_hook.h"
+//#include "libc_override.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -53,8 +54,6 @@ void *ps_realloc(void *ptr, size_t size)
 
 void ps_free(void *ptr)
 {
-        pthread_mutex_lock(&mtx);
-        //        printf("ps_free   start\n");
         struct central_cache *cc = NULL;
         struct thread_cache *current_thread = get_current_thread();
         //        printf("ps_free   middle: %zu\n", current_thread->count);        
@@ -72,5 +71,4 @@ void ps_free(void *ptr)
         // Check if this thread till be used
         check_thread_use(current_thread, 0);
         //        printf("ps_free   end\n");
-        pthread_mutex_unlock(&mtx);
 }

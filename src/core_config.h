@@ -12,6 +12,10 @@
 #include <stddef.h>           // for size_t
 #include <stdint.h>           // for uint8_t, uint16_t, uint32_t
 
+/* Version of PSMalloc */
+#define __PSMALLOC__ 0
+#define __PSMALLOC_MINOR__ 1
+
 
 /*
   **************************************************
@@ -20,7 +24,6 @@
 */
 /* Each thread has a thread_cache_struct */
 struct thread_cache {
-        size_t               count;
         struct central_cache *cc;
         struct chunk_head    *mm;
         struct thread_cache  *next;
@@ -71,7 +74,7 @@ static const size_t chunk_size[] = {64,          // 64 Bytes
 
 /* Critical size
    Allocation more than this size should use mmap */
-static const size_t critical_size = 1024*512 - 1024*64;
+static const size_t critical_size = 1024*512 - 1024*16;
 
 
 #endif

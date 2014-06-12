@@ -6,14 +6,16 @@ void func(void) {
         int i;
         void *p[10];
 
-        for (i=0; i<10; ++i)
-                p[i] = ps_malloc(i*i + 100);
+        for (i=0; i<10; ++i) {
+                p[i] = malloc(i*i + 100);
+                //printf("malloc %p\n", p[i]);
+        }
 
         for (i=0; i<10; ++i)
-                p[i] = ps_realloc(p[i], i*i + 99);
+                p[i] = realloc(p[i], i*i + 99);
 
         for (i=0; i<10; ++i)
-                ps_free(p[i]);
+                free(p[i]);
 
         ch = p[0] - chunk_head_size;
         printf("%p, %d, %d, %zu\n", ch, ch->kind, ch->num, ch->seek);

@@ -13,39 +13,32 @@ void func(void)
         void *p2[num];
         struct chunk_head *ch = NULL;
         
-        for (i=0; i<num; ++i)
-                p1[i] = ps_malloc(i*i*100 + 100);
+        for (i=0; i<num; ++i) 
+                p1[i] = ps_malloc(i*i*100 + 400);
 
-        for (i=0; i<num; ++i)
-                p1[i] = ps_realloc(p1[i], i*i*100 + 101);
+        //for (i=0; i<num; ++i)
+        //p1[i] = ps_realloc(p1[i], i*i*100 + 101);
 
-        //printf("\n2malloc\n");
-        for (i=0; i<num; ++i) {
-                p2[i] = ps_malloc(i*i*100 + 100);
+        //for (i=0; i<num; ++i)
+        //p2[i] = ps_malloc(i*i*100 + 100);
                 //printf("ps_malloc ptr %p\n", p2[i]);
-        }
 
-        //printf("\n1free\n");
         for (i=0; i<num; ++i)
                 ps_free(p1[i]);
 
-        //printf("\n2realloc\n");
-        for (i=0; i<num; ++i)
-                p2[i] = ps_realloc(p2[i], i*i*100 + 101);
+        //for (i=0; i<num; ++i)
+        //p2[i] = ps_realloc(p2[i], i*i*100 + 101);
 
-        //printf("\n2free\n");
-        for (i=0; i<num; ++i)
-                ps_free(p2[i]);
-
+        //for (i=0; i<num; ++i)
+        //ps_free(p2[i]);
         //ch = p1[0] - chunk_head_size;
         //printf("%p, %d, %d, %zu\n", ch, ch->kind, ch->num, ch->seek);
-
         pthread_exit(0);
 }
 
 int main(void)
 {
-        const int num = 1500;
+        const int num = 1000;
         int i = 0;
         pthread_t tid[num];
         time_t timer1, timer2;

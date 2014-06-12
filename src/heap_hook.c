@@ -47,11 +47,12 @@ struct central_cache *find_central_of_pointer(struct thread_cache *tc,
                                               void *ptr)
 {
         struct central_cache *cc = tc->cc;
-        do {
-                if (ptr>=cc && ptr<(void*)cc+central_cache_size)
+        while (1) {
+                if (ptr>(void*)cc && ptr<(void*)cc+central_cache_size)
                         break;
-                cc = cc->next;
-        } while (cc != tc->cc);
+                if ((cc = cc->next) == tc->cc)
+                        return NULL;
+        }
         return cc;
 }
 
@@ -60,14 +61,14 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
         struct chunk_head *prev_ch = cc->free_chunk;
         struct chunk_head *next_ch = prev_ch;
         ch->seek = chunk_size[ch->kind] * ch->num;
-        
+        ch->next = NULL;
+
         for (; next_ch!=NULL; prev_ch=next_ch, next_ch=next_ch->next) {
                 if (next_ch > ch)
                         break;
         }
 
-        // Check arround target chunk
-        // Piece front
+        /* Check arround target chunk */
         if (next_ch == cc->free_chunk) {
                 cc->free_chunk = ch;
         } else {
@@ -75,11 +76,11 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
                         prev_ch->seek += ch->seek;
                         ch = prev_ch;
                 } else {
+                        ch->next = prev_ch->next;
                         prev_ch->next = ch;
                 }
         }
 
-        // Piece behind
         if (next_ch != NULL) {
                 if ((size_t)next_ch-(size_t)ch == ch->seek) {
                         ch->seek += next_ch->seek;
@@ -88,6 +89,8 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
                         ch->next = next_ch;
                 }
         }
+        //        printf("free %p, seek %zu, next %p\n",
+        //     cc->free_chunk, cc->free_chunk->seek, cc->free_chunk->next);
 }
 
 static uint8_t check_size(size_t size, uint8_t *kind)
@@ -108,6 +111,7 @@ static void *get_suitable_chunk(struct thread_cache *tc,
 {
         struct chunk_head *ch = NULL;
         struct chunk_head *prev_ch = NULL;
+        struct chunk_head *next_ch = NULL;
         struct central_cache *cc = NULL;
         size_t tar_size = chunk_size[kind] * num;
         int index;
@@ -143,7 +147,7 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                         }
                 } else if (old_ch->kind > kind) {               // Smaller kind
                         // Turn to new kind
-                        for (index=kind; index>old_ch->kind; --index)
+                        for (index=kind; index<old_ch->kind; ++index)
                                 old_ch->num *= 4;
                         old_ch->kind = kind;
 
@@ -162,8 +166,8 @@ static void *get_suitable_chunk(struct thread_cache *tc,
         cc = tc->cc;
         // Find in central caches
         while(1) {
-                ch = cc->free_chunk;
                 prev_ch = cc->free_chunk;
+                ch = prev_ch;
                 // Find in free chunks
                 for (; ch != NULL; prev_ch=ch, ch=ch->next) {
                         if (ch->seek >= tar_size)
@@ -182,14 +186,16 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                 if (ch == cc->free_chunk) {
                         cc->free_chunk = (void*)ch + tar_size;
                         cc->free_chunk->seek = ch->seek - tar_size;
+                        cc->free_chunk->next = ch->next;
                 } else {
                         prev_ch->next = (void*)ch + tar_size;
                         prev_ch->next->seek = ch->seek - tar_size;
+                        prev_ch->next->next = ch->next;
                 }
         } else {
-                if (ch == cc->free_chunk)
+                if (ch == cc->free_chunk) {
                         cc->free_chunk = ch->next;
-                else
+                } else
                         prev_ch->next = ch->next;
         }
 

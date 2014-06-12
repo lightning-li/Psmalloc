@@ -21,7 +21,7 @@ static pthread_key_t tkey;
 
 // Mutex when global get central cache
 static pthread_mutex_t mutex;
-static pthread_mutex_t mtx;
+
 
 /*
   function

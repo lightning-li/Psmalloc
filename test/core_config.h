@@ -12,6 +12,10 @@
 #include <stddef.h>           // for size_t
 #include <stdint.h>           // for uint8_t, uint16_t, uint32_t
 
+/* Version of PSMalloc */
+#define __PSMALLOC__ 0
+#define __PSMALLOC_MINOR__ 1
+
 
 /*
   **************************************************
@@ -60,19 +64,18 @@ static const size_t central_cache_size  = 1024*512;  // 512 KB
 static const size_t num_of_add_central = 4;
 
 /* Num of kinds */
-static const uint8_t num_of_kinds = 6;
+static const uint8_t num_of_kinds = 5;
 
 /* Size of four kinds of chunk in each thread */
 static const size_t chunk_size[] = {64,          // 64 Bytes
                                     256,         // 256 Bytes
                                     1024,        // 1 KB
                                     1024*4,      // 4 KB
-                                    1024*16,     // 16 KB
-                                    1024*64};    // 64 KB
+                                    1024*16};    // 16 KB
 
 /* Critical size
    Allocation more than this size should use mmap */
-static const size_t critical_size = 1024*512 - 1024*64;
+static const size_t critical_size = 1024*512 - 1024*16;
 
 
 #endif

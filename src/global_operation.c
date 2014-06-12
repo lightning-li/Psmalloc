@@ -7,7 +7,6 @@ void init_before_main(void)
 {
         /* Initialize mutex tkey */
         pthread_mutex_init(&mutex, NULL);
-        pthread_mutex_init(&mtx, NULL);
         pthread_key_create(&tkey, &thread_destructor);
 
         pthread_mutex_lock(&mutex);   // Lock
@@ -38,24 +37,29 @@ struct thread_cache *thread_init(void)
         // Get first free central cache
         free_central = (cc = free_central)->next;
         pthread_setspecific(tkey, tc);
+        
         pthread_mutex_unlock(&mutex);
         
         central_renew(cc);
         // Initialize thread_cache_struct
-        tc->count = 0;
         tc->cc = cc;
+        tc->mm = NULL;
         return tc;
 }
 
 void thread_destructor(void *ptr)
 {
         struct thread_cache *tc = ptr;
-        if (tc->count != 0)
-                check_thread_use(tc, 1);
-                
+
         pthread_mutex_lock(&mutex);     // Lock
+
+        // Add all central caches in thread to free central
+        tc->cc->prev->next = free_central;
+        free_central = tc->cc;
+        
         tc->next = free_thread;
         free_thread = tc;
+
         pthread_mutex_unlock(&mutex);   // Unlock
 }
 
@@ -67,18 +71,18 @@ void central_renew(struct central_cache *cc)
         /* Initialize first free chunk */
         cc->free_chunk = (void*)cc + chunk_size[0];
         cc->free_chunk->seek = central_cache_size - chunk_size[0];
-        //        printf("renew %zu\n", cc->free_chunk->seek);
         cc->free_chunk->next = NULL;
 }
 
 void global_add_central(void)
 {
-        char index;
+        int index;
         struct central_cache *cc = NULL;
 
         /* Initialize first central */
         free_central = sbrk(central_cache_size);
         cc = free_central;
+        //printf("global add central\n");
 
         /* Initialize other central */
         for (index = num_of_add_central-1; index > 0; --index) {
@@ -86,10 +90,18 @@ void global_add_central(void)
                 cc = cc->next;
         }
         cc->next = NULL;
+        /*cc = free_central;
+        index = 0;
+        while (cc!=NULL) {
+                index++;
+                cc = cc->next;
+        }
+        printf("g a c %d\n", index);*/
 }
 
 void thread_add_central(struct thread_cache *tc)
 {
+        printf("thread add \n");
         struct central_cache *new_cc = NULL;
 
         pthread_mutex_lock(&mutex);     // Lock
@@ -127,20 +139,3 @@ struct thread_cache *get_current_thread(void)
         return tc;
 }
 
-void check_thread_use(struct thread_cache *tc, int flag)
-{
-        struct central_cache *cc = NULL;
-
-        if (tc->count != 0 && flag == 0)
-                return;
-
-        pthread_mutex_lock(&mutex);     // Lock
-
-        // Add all central caches in thread to free central
-        tc->cc->prev->next = free_central;
-        free_central = tc->cc;
-        
-        pthread_mutex_unlock(&mutex);   // Unlock
-        
-        tc->cc = NULL;
-}

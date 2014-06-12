@@ -3,47 +3,49 @@
 #include "global_operation.h"
 #include "heap_hook.h"
 #include "mmap_hook.h"
-//#include "libc_override.h"
+#include "libc_override.h"
+#include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 void *ps_malloc(size_t size)
 {
-        void *ret = NULL;
-        struct thread_cache *current_thread = get_current_thread();
-        
-        if (size < critical_size) {
-                // Third argument is zero
-                // Bytes in chunk will not be initialized 
-                ret = chunk_alloc_hook(current_thread, size, 0);
-        } else {
-                ret = mmap_alloc_hook(current_thread, size, 0);
-        }
-        current_thread->count++;
+        void *ret = do_malloc(size, 0);
         return ret;
 }
 
 void *ps_calloc(size_t n, size_t size)
 {
-        void *ret = NULL;
-        struct thread_cache *current_thread = get_current_thread();
-
-        if (n*size < critical_size) {
-                // Third argument is one
-                // Bytes in chunk will be initialized
-                ret = chunk_alloc_hook(current_thread, size*n, 1);
-        } else {
-                ret = mmap_alloc_hook(current_thread, size*n, 1);
-        }
-        current_thread->count++;
+        void *ret = do_malloc(n*size, 1);
         return ret;
+}
+
+void ps_free (void *ptr)
+{
+        do_free(ptr);
+}
+
+void ps_cfree(void *ptr)
+{
+        do_free(ptr);
 }
 
 void *ps_realloc(void *ptr, size_t size)
 {
         void *ret = NULL;
-        struct thread_cache *current_thread = get_current_thread();
+        struct thread_cache *current_thread = NULL;
 
+        /* Check pointer */
+        if (ptr == NULL) {
+                ret = do_malloc(size, 0);
+                return ret;
+        }
+        /* Check size */
+        if (size == 0) {
+                do_free(ptr);
+                return NULL;
+        }
+
+        current_thread = get_current_thread();
         if (size < critical_size) {
                 ret = chunk_realloc_hook(current_thread, ptr, size);
         } else {
@@ -52,23 +54,56 @@ void *ps_realloc(void *ptr, size_t size)
         return ret;
 }
 
-void ps_free(void *ptr)
+void *ps_memalign(size_t align, size_t size)
 {
+        void *ret = NULL;
+        printf("memalign\n");
+        ret = do_malloc(size, 0);
+        return ret;
+}
+
+void *ps_valloc(size_t size)
+{
+        void *ret = ps_memalign(getpagesize(), size);
+        return ret;
+}
+
+void *do_malloc(size_t size, int flag)
+{
+        void *ret = NULL;
+        struct thread_cache *current_thread = NULL;
+
+        /* Check size */
+        if (size == 0)
+                return NULL;
+
+        current_thread = get_current_thread();
+        if (size < critical_size) {
+                // Third argument is flag
+                ret = chunk_alloc_hook(current_thread, size, flag);
+        } else {
+                ret = mmap_alloc_hook(current_thread, size, flag);
+        }
+
+        return ret;
+}
+
+void do_free(void *ptr)
+{
+        if (free_central != NULL)
+                printf("Not NULL\n");
         struct central_cache *cc = NULL;
-        struct thread_cache *current_thread = get_current_thread();
-        //        printf("ps_free   middle: %zu\n", current_thread->count);        
+        struct thread_cache *current_thread = NULL;
+
+        /* Check pointer */
+        if (ptr == NULL)
+                return;
+
+        current_thread = get_current_thread();
         cc = find_central_of_pointer(current_thread, ptr);
 
-        //        printf("ps_free   middle  sec\n");
         if (cc != NULL)
                 do_chunk_free(cc, ptr - chunk_head_size);
         else
                 do_mmap_free(current_thread, ptr - chunk_head_size);
-
-        //        printf("ps_free   middle  thi\n");
-        current_thread->count--;
-
-        // Check if this thread till be used
-        check_thread_use(current_thread, 0);
-        //        printf("ps_free   end\n");
 }

@@ -6,7 +6,7 @@
 
 void func(void)
 {
-        const int num = 1;
+        const int num = 10;
         int i = 0;
         void *p1[num];
         void *p2[num];
@@ -17,19 +17,19 @@ void func(void)
                 p1[i] = malloc(i*i*100 + 400);
         p = p1[0];
 
-        //for (i=0; i<num; ++i)
-        //p1[i] = realloc(p1[i], i*i*100 + 100);
+        for (i=0; i<num; ++i)
+                p1[i] = realloc(p1[i], i*i*100 + 100);
 
-        //for (i=0; i<num; ++i)
-        //p2[i] = malloc(i*i*100 + 100);
+        for (i=0; i<num; ++i)
+                p2[i] = malloc(i*i*100 + 100);
 
         for (i=0; i<num; ++i)
                 free(p1[i]);
 
-        //for (i=0; i<num; ++i)
-        //p2[i] = realloc(p2[i], i*i*100 + 400);
-        //for (i=0; i<num; ++i)
-        //free(p2[i]);
+        for (i=0; i<num; ++i)
+                p2[i] = realloc(p2[i], i*i*100 + 400);
+        for (i=0; i<num; ++i)
+                free(p2[i]);
 
         ch = p - chunk_head_size;
         //printf("%p , %d, %d, %zu, %p\n", ch, ch->kind, ch->num, ch->seek, ch->next);

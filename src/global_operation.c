@@ -90,13 +90,6 @@ void global_add_central(void)
                 cc = cc->next;
         }
         cc->next = NULL;
-        /*cc = free_central;
-        index = 0;
-        while (cc!=NULL) {
-                index++;
-                cc = cc->next;
-        }
-        printf("g a c %d\n", index);*/
 }
 
 void thread_add_central(struct thread_cache *tc)

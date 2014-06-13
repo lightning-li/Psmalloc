@@ -3,7 +3,7 @@
 #include "global_operation.h"
 #include "heap_hook.h"
 #include "mmap_hook.h"
-//#include "libc_override.h"
+#include "libc_override.h"
 #include <unistd.h>
 #include <stdio.h>
 

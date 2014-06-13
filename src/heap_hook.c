@@ -47,11 +47,10 @@ struct central_cache *find_central_of_pointer(struct thread_cache *tc,
                                               void *ptr)
 {
         struct central_cache *cc = tc->cc;
-        while (1) {
+        while (cc != NULL) {
                 if (ptr>(void*)cc && ptr<(void*)cc+central_cache_size)
                         break;
-                if ((cc = cc->next) == tc->cc)
-                        return NULL;
+                cc = cc->next;
         }
         return cc;
 }
@@ -89,8 +88,6 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
                         ch->next = next_ch;
                 }
         }
-        //        printf("free %p, seek %zu, next %p\n",
-        //     cc->free_chunk, cc->free_chunk->seek, cc->free_chunk->next);
 }
 
 static uint8_t check_size(size_t size, uint8_t *kind)
@@ -111,7 +108,6 @@ static void *get_suitable_chunk(struct thread_cache *tc,
 {
         struct chunk_head *ch = NULL;
         struct chunk_head *prev_ch = NULL;
-        struct chunk_head *next_ch = NULL;
         struct central_cache *cc = NULL;
         size_t tar_size = chunk_size[kind] * num;
         int index;
@@ -175,10 +171,12 @@ static void *get_suitable_chunk(struct thread_cache *tc,
                 }
                 if (ch != NULL)
                         break;
-                if (cc->next == tc->cc){
+                if (cc->next == NULL) {
                         thread_add_central(tc);
+                        cc = tc->cc;
+                } else {
+                        cc = cc->next;
                 }
-                cc = cc->next;
         }
 
         // If the size of target chunk is bigger than need

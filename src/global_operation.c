@@ -14,8 +14,8 @@ void init_before_main(void)
         /* Allocation for central and thread struct */
         thread_slab  = sbrk(thread_slab_size);
         global_add_central();
-        
         pthread_mutex_unlock(&mutex); // Unlock
+        thread_init();
 }
 
 struct thread_cache *thread_init(void)
@@ -50,11 +50,14 @@ struct thread_cache *thread_init(void)
 void thread_destructor(void *ptr)
 {
         struct thread_cache *tc = ptr;
+        struct central_cache *cc = tc->cc;
+        while (cc->next != NULL)
+                cc = cc->next;
 
         pthread_mutex_lock(&mutex);     // Lock
 
         // Add all central caches in thread to free central
-        tc->cc->prev->next = free_central;
+        cc->next = free_central;
         free_central = tc->cc;
         
         tc->next = free_thread;
@@ -66,8 +69,7 @@ void thread_destructor(void *ptr)
 void central_renew(struct central_cache *cc)
 {
         int index;
-        cc->next = cc;
-        cc->prev = cc;
+        cc->next = NULL;
         /* Initialize first free chunk */
         cc->free_chunk = (void*)cc + chunk_size[0];
         cc->free_chunk->seek = central_cache_size - chunk_size[0];
@@ -82,7 +84,6 @@ void global_add_central(void)
         /* Initialize first central */
         free_central = sbrk(central_cache_size);
         cc = free_central;
-        //printf("global add central\n");
 
         /* Initialize other central */
         for (index = num_of_add_central-1; index > 0; --index) {
@@ -94,7 +95,6 @@ void global_add_central(void)
 
 void thread_add_central(struct thread_cache *tc)
 {
-        printf("thread add \n");
         struct central_cache *new_cc = NULL;
 
         pthread_mutex_lock(&mutex);     // Lock
@@ -111,14 +111,8 @@ void thread_add_central(struct thread_cache *tc)
         /* Initialize chunks in central */
         central_renew(new_cc);        
         /* Add new central to thread cache */
-        if (tc->cc == NULL) {
-                tc->cc = new_cc;
-        } else {
-                new_cc->prev = tc->cc->prev;
-                new_cc->next = tc->cc;
-                tc->cc->prev->next = new_cc;
-                tc->cc->prev = new_cc;
-        }
+        new_cc->next = tc->cc;
+        tc->cc = new_cc;
 }
 
 struct thread_cache *get_current_thread(void)

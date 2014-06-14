@@ -1,11 +1,3 @@
-/*
-  **************************************************
-
-  API definitions for psmalloc
-
-  **************************************************
-*/
-
 #ifndef PSMALLOC_PSMALLOC_H_
 #define PSMALLOC_PSMALLOC_H_
 
@@ -27,8 +19,8 @@ void *ps_memalign(size_t align, size_t size) __THROW;
 void *ps_valloc(size_t size) __THROW;
 struct mallinfo ps_mallinfo(void);
 
-void *do_malloc(size_t size, int flag);
-void do_free(void *ptr);
+static void *do_malloc(size_t size, size_t align, int flag);
+static void do_free(void *ptr);
 
 
 #endif

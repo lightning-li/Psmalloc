@@ -11,25 +11,20 @@ void *mmap_alloc_hook(struct thread_cache *tc, size_t size, int flag)
         struct chunk_head *mm = NULL;
         struct chunk_head *mm_prev = tc->mm;
 
-        // Get mmap 
+        /* Get mmap */
         mm = mmap(NULL, size + chunk_head_size, PROT_READ | PROT_WRITE,
                   MAP_PRIVATE | MAP_ANON, -1, 0);
         mm->seek = size;
         mm->next = NULL;
 
-        // Add mmap to thread
-        if (mm_prev == NULL) {
-                tc->mm = mm;
-        } else {
-                while (mm_prev->next != NULL)
-                        mm_prev = mm_prev->next;
-                mm_prev->next = mm;
-        }
+        /* Add mmap chunk into thread */
+        mm->next = tc->mm;
+        tc->mm = mm;
         
         ret = mm + 1;
-        // calloc
-        if (flag)
+        if (flag)             // realloc
                 memset(ret, 0, size);
+        printf("mmap alloc\n");
         return ret;
 }
 
@@ -70,5 +65,5 @@ void do_mmap_free(struct thread_cache *tc, struct chunk_head *old_mm)
                 mm->next = old_mm->next;
         }
         munmap(old_mm, old_mm->seek + chunk_head_size);
-        
+        printf("mmap free\n");
 }

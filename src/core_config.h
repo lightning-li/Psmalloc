@@ -9,8 +9,8 @@
 #ifndef PSMALLOC_CORE_CONFIG_H_
 #define PSMALLOC_CORE_CONFIG_H_
 
-#include <stddef.h>           // for size_t
-#include <stdint.h>           // for uint8_t, uint16_t, uint32_t
+#include <stdint.h>                // for uint8_t, uint16_t, uint32_t
+#include <stddef.h>                // for size_t
 
 /* Version of PSMalloc */
 #define __PSMALLOC__ 0
@@ -23,8 +23,8 @@
 */
 /* Each thread has a thread_cache_struct */
 struct thread_cache {
-        struct central_cache *cc;
-        struct chunk_head    *mm;
+        struct central_cache *cc;   // central caches allocated for this thread
+        struct chunk_head    *mm;   // mmap chunks
         struct thread_cache  *next;
 };
 
@@ -36,10 +36,10 @@ struct central_cache {
 
 /* Each chunk has a chunk_head at the beginning */
 struct chunk_head {
-        uint8_t           kind;     // num_of_kinds
-        uint8_t           num;      // 1, 2, 3 or more
-        size_t            seek;
         struct chunk_head *next;
+        uint8_t            kind;
+        uint32_t           seek;
+        uint8_t            num;      // 1, 2, 3 or more
 };
 
 /*
@@ -52,7 +52,7 @@ struct chunk_head {
 static const size_t chunk_head_size = sizeof(struct chunk_head);
 
 /* Size of slab for central and thread struct */
-static const size_t thread_slab_size    = 100 * sizeof(struct thread_cache);
+static const size_t thread_slab_size    = 500 * sizeof(struct thread_cache);
 
 /* Size of each central cache */
 static const size_t central_cache_size  = 1024*512;  // 512 KB

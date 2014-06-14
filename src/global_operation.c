@@ -1,20 +1,33 @@
 #include "global_operation.h"
-#include <unistd.h>
 #include <pthread.h>
-#include <stdio.h>
+
+/* Pointer to allocate central_cache */
+static struct thread_cache *thread_slab = NULL;
+
+/* List of free thread_cache */
+static struct thread_cache *free_thread = NULL;
+
+/* List of free central_cache */
+static struct central_cache *free_central = NULL;
+
+/* Key to get thread cache */
+static pthread_key_t tkey;
+
+/* Mutex when global get central cache */
+static pthread_mutex_t mutex;
+
 
 void init_before_main(void)
 {
-        /* Initialize mutex tkey */
+        /* Initialize mutex, tkey */
         pthread_mutex_init(&mutex, NULL);
         pthread_key_create(&tkey, &thread_destructor);
-
-        pthread_mutex_lock(&mutex);   // Lock
-        
-        /* Allocation for central and thread struct */
+        /* Allocate for struct thread_cache */
         thread_slab  = sbrk(thread_slab_size);
+
+        /* Initialize global central
+           and allocate for main thread*/
         global_add_central();
-        pthread_mutex_unlock(&mutex); // Unlock
         thread_init();
 }
 
@@ -23,27 +36,28 @@ struct thread_cache *thread_init(void)
         struct central_cache *cc = NULL;
         struct thread_cache *tc  = NULL;
 
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex);     // Lock
         
-        /* Get thread cache */
+        /* Get struct thread_cache */
         if (free_thread == NULL)
                 tc = thread_slab++;
         else
                 free_thread = (tc = free_thread)->next;
         
-        // Check if there is free central cache
+        /* Check if there is free central cache */
         if (free_central == NULL)
                 global_add_central();
-        // Get first free central cache
+        /* Get a free central */
         free_central = (cc = free_central)->next;
+        /* Set tc as thread private data */
         pthread_setspecific(tkey, tc);
         
-        pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);   // Unlock
         
         central_renew(cc);
-        // Initialize thread_cache_struct
         tc->cc = cc;
         tc->mm = NULL;
+        
         return tc;
 }
 
@@ -51,15 +65,16 @@ void thread_destructor(void *ptr)
 {
         struct thread_cache *tc = ptr;
         struct central_cache *cc = tc->cc;
+        
         while (cc->next != NULL)
                 cc = cc->next;
 
         pthread_mutex_lock(&mutex);     // Lock
 
-        // Add all central caches in thread to free central
+        /* Give back all central caches in thread */
         cc->next = free_central;
         free_central = tc->cc;
-        
+        /* Give back tc */
         tc->next = free_thread;
         free_thread = tc;
 
@@ -68,7 +83,6 @@ void thread_destructor(void *ptr)
 
 void central_renew(struct central_cache *cc)
 {
-        int index;
         cc->next = NULL;
         /* Initialize first free chunk */
         cc->free_chunk = (void*)cc + chunk_size[0];
@@ -103,23 +117,20 @@ void thread_add_central(struct thread_cache *tc)
         if (free_central == NULL)
                 global_add_central();
         
-        /* Get first free central cache */
+        /* Get first free central */
         free_central = (new_cc = free_central)->next;
         
         pthread_mutex_unlock(&mutex);   // Unlock
 
-        /* Initialize chunks in central */
-        central_renew(new_cc);        
-        /* Add new central to thread cache */
+        central_renew(new_cc);
         new_cc->next = tc->cc;
         tc->cc = new_cc;
 }
 
 struct thread_cache *get_current_thread(void)
 {
-        struct thread_cache *tc = NULL;
-
-        tc = pthread_getspecific(tkey);
+        struct thread_cache *tc = pthread_getspecific(tkey);
+        
         if (tc == NULL)
                 tc = thread_init();
         

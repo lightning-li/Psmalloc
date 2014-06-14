@@ -56,7 +56,6 @@ struct central_cache *find_central_of_pointer(struct thread_cache *tc,
 
 void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
 {
-        printf("do free\n");
         struct chunk_head *prev_ch = cc->free_chunk;
         struct chunk_head *next_ch = prev_ch;
         ch->seek = chunk_size[ch->kind] * ch->num;

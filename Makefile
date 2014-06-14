@@ -32,9 +32,9 @@ test:
 	$(CC) -lpthread $(TEST) -o test_libc
 	$(CC) -lpthread -lpsmalloc $(TEST) -o test_psmalloc
 	@echo -e "\nlibc:"
-	@./test_libc 1
+	@./test_libc 100
 	@echo -e "\npsmalloc:"
-	@./test_psmalloc 1
+	@./test_psmalloc 100
 	@rm test_libc test_psmalloc
 
 .PHONY:distclean

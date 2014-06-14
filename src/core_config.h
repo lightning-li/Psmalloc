@@ -38,7 +38,7 @@ struct central_cache {
 struct chunk_head {
         struct chunk_head *next;
         uint8_t            kind;
-        uint32_t           seek;
+        uint32_t             seek;
         uint8_t            num;      // 1, 2, 3 or more
 };
 

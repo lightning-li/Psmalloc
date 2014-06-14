@@ -29,12 +29,13 @@ install:
 
 .PHONY:test
 test:
-	$(CC) -lpthread $(TEST) -o ptmalloc.test
-	$(CC) -lpthread -lpsmalloc $(TEST) -o psmalloc.test
-	@echo "ptmalloc:"
-	@./ptmalloc.test
-	@echo "psmalloc:"
-	@./psmalloc.test
+	$(CC) -lpthread $(TEST) -o test_libc
+	$(CC) -lpthread -lpsmalloc $(TEST) -o test_psmalloc
+	@echo -e "\nlibc:"
+	@./test_libc
+	@echo -e "\npsmalloc:"
+	@./test_psmalloc
+	@rm test_libc test_psmalloc
 
 .PHONY:distclean
 distclean:

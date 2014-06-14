@@ -33,7 +33,7 @@ void func(void)
 
 int main(void)
 {
-        const int num = 500;
+        const int num = 100;
         int i = 0;
         pthread_t tid[num];
         void *p = NULL;

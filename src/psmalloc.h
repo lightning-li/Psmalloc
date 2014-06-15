@@ -17,10 +17,6 @@ void ps_cfree(void *ptr) __THROW;
 void *ps_realloc(void *ptr, size_t size) __THROW;
 void *ps_memalign(size_t align, size_t size) __THROW;
 void *ps_valloc(size_t size) __THROW;
-struct mallinfo ps_mallinfo(void);
-
-static void *do_malloc(size_t size, size_t align, int flag);
-static void do_free(void *ptr);
-
+//struct mallinfo ps_mallinfo(void);
 
 #endif

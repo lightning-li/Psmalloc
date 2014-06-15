@@ -34,8 +34,8 @@ test:
 	@echo -e "\nlibc:"
 	@./test_libc 100
 	@echo -e "\npsmalloc:"
-	@./test_psmalloc 100
-	@rm test_libc test_psmalloc
+	@./test_psmalloc 1
+	@rm -f test_libc test_psmalloc
 
 .PHONY:distclean
 distclean:

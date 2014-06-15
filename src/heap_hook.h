@@ -15,18 +15,18 @@ struct central_cache *find_central_of_pointer(struct thread_cache *tc,
                                               void *ptr);
 
 /* Check kind and num of appointed size */
-static uint8_t check_size(size_t size, uint8_t *kind);
+//static uint8_t check_size(size_t size, uint8_t *kind);
 
 /* Get suitable chunk */
-static void *get_suitable_chunk(struct thread_cache *tc,
-                                uint8_t kind,
-                                uint8_t num,
-                                size_t align,
-                                struct chunk_head *old_ch);
+//static void *get_suitable_chunk(struct thread_cache *tc,
+//                                uint8_t kind,
+//                                uint8_t num,
+//                                size_t align,
+//                                struct chunk_head *old_ch);
 
 /* If the appoint place is free and size is enough, then return it */
-static void *get_appoint_chunk(struct central_cache *cc,
-                               size_t tar_size,
-                               void *ptr);
+//static void *get_appoint_chunk(struct central_cache *cc,
+//                               size_t tar_size,
+//                               void *ptr);
 
 #endif

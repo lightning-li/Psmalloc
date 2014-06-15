@@ -4,7 +4,43 @@
 #include "heap_hook.h"
 #include "mmap_hook.h"
 #include "libc_override.h"
-#include <unistd.h>           // For getpagesize()
+#include <unistd.h>           // For getpagesize(
+
+void *do_malloc(size_t size, size_t align, int flag)
+{
+        void *ret = NULL;
+        struct thread_cache *current_thread = NULL;
+
+        /* Check size */
+        if (size == 0)
+                return NULL;
+
+        current_thread = get_current_thread();
+        if (size < critical_size) {
+                ret = chunk_alloc_hook(current_thread, size, align, flag);
+        } else {
+                ret = mmap_alloc_hook(current_thread, size, flag);
+        }
+
+        return ret;
+}
+
+void do_free(void *ptr)
+{
+        struct central_cache *cc = NULL;
+        struct thread_cache *current_thread = NULL;
+
+        /* Check pointer */
+        if (ptr == NULL)
+                return;
+
+        current_thread = get_current_thread();
+        cc = find_central_of_pointer(current_thread, ptr);
+        if (cc != NULL)
+                do_chunk_free(cc, ptr - chunk_head_size);
+        else 
+                do_mmap_free(current_thread, ptr - chunk_head_size);
+}
 
 void *ps_malloc(size_t size)
 {
@@ -63,40 +99,4 @@ void *ps_realloc(void *ptr, size_t size)
                 ret = mmap_realloc_hook(current_thread, ptr, size);
         }
         return ret;
-}
-
-void *do_malloc(size_t size, size_t align, int flag)
-{
-        void *ret = NULL;
-        struct thread_cache *current_thread = NULL;
-
-        /* Check size */
-        if (size == 0)
-                return NULL;
-
-        current_thread = get_current_thread();
-        if (size < critical_size) {
-                ret = chunk_alloc_hook(current_thread, size, align, flag);
-        } else {
-                ret = mmap_alloc_hook(current_thread, size, flag);
-        }
-
-        return ret;
-}
-
-void do_free(void *ptr)
-{
-        struct central_cache *cc = NULL;
-        struct thread_cache *current_thread = NULL;
-
-        /* Check pointer */
-        if (ptr == NULL)
-                return;
-
-        current_thread = get_current_thread();
-        cc = find_central_of_pointer(current_thread, ptr);
-        if (cc != NULL)
-                do_chunk_free(cc, ptr - chunk_head_size);
-        else 
-                do_mmap_free(current_thread, ptr - chunk_head_size);
 }

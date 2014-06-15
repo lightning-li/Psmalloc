@@ -33,11 +33,11 @@ test:
 	$(CC) -lpthread -ltcmalloc $(TEST) -o test_tcmalloc
 	$(CC) -lpthread -lpsmalloc $(TEST) -o test_psmalloc
 	@echo -e "\nlibc:"
-	@./test_libc 1000
+	@./test_libc 100
 	@echo -e "\ntcmalloc:"
-	@./test_tcmalloc 1000
+	@./test_tcmalloc 100
 	@echo -e "\npsmalloc:"
-	@./test_psmalloc 1000
+	@./test_psmalloc 100
 	@rm -f test_libc test_tcmalloc test_psmalloc
 
 .PHONY:distclean

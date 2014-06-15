@@ -1,6 +1,5 @@
 #include "global_operation.h"
 #include <unistd.h>
-#include <stdlib.h>
 #include <pthread.h>
 
 /* Pointer to allocate central_cache */
@@ -55,6 +54,15 @@ void thread_destructor(void *ptr)
         pthread_mutex_unlock(&mutex);   // Unlock
 }
 
+void central_renew(struct central_cache *cc)
+{
+        cc->next = NULL;
+        /* Initialize first free chunk */
+        cc->free_chunk = (void*)cc + chunk_size[0];
+        cc->free_chunk->seek = central_cache_size - chunk_size[0];
+        cc->free_chunk->next = NULL;
+}
+
 struct thread_cache *thread_init(void)
 {
         struct central_cache *cc = NULL;
@@ -97,15 +105,6 @@ void init_before_main(void)
            and allocate for main thread*/
         global_add_central();
         thread_init();
-}
-
-void central_renew(struct central_cache *cc)
-{
-        cc->next = NULL;
-        /* Initialize first free chunk */
-        cc->free_chunk = (void*)cc + chunk_size[0];
-        cc->free_chunk->seek = central_cache_size - chunk_size[0];
-        cc->free_chunk->next = NULL;
 }
 
 void thread_add_central(struct thread_cache *tc)

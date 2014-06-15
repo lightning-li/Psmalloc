@@ -1,15 +1,13 @@
 #include "mmap_hook.h"
 #include "global_operation.h"
-#include "heap_hook.h"
+#include "head_hook.h"
 #include <sys/mman.h>
 #include <string.h>
-#include <stdio.h>
 
 void *mmap_alloc_hook(struct thread_cache *tc, size_t size, int flag)
 {
         void *ret = NULL;
         struct chunk_head *mm = NULL;
-        struct chunk_head *mm_prev = tc->mm;
 
         /* Get mmap */
         mm = mmap(NULL, size + chunk_head_size, PROT_READ | PROT_WRITE,

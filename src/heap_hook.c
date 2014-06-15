@@ -57,7 +57,6 @@ void *get_suitable_chunk(struct thread_cache *tc,
         struct chunk_head *prev_ch = NULL;
         struct central_cache *cc = NULL;
         size_t tar_size = chunk_size[kind] * num;
-        size_t ali_num;
         int index;
 
         if (old_ch != NULL) {           // realloc

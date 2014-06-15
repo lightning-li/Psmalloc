@@ -40,18 +40,14 @@ void thread_destructor(void *ptr)
         struct thread_cache *tc = ptr;
         struct central_cache *cc = tc->cc;
         
-        //while (cc->next != NULL)
-        //cc = cc->next;
+        while (cc->next != NULL)
+                cc = cc->next;
 
         pthread_mutex_lock(&mutex);     // Lock
 
         /* Give back all central caches in thread */
-        cc = free_central;
-        while (cc->next!=NULL)
-                cc = cc->next;
-        cc->next = tc->cc;
-        //cc->next = free_central;
-        //free_central = tc->cc;
+        cc->next = free_central;
+        free_central = tc->cc;
         /* Give back tc */
         tc->next = free_thread;
         free_thread = tc;

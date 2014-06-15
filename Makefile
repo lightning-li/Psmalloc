@@ -15,13 +15,13 @@ TEST = ./test/test.c
 
 CC = gcc
 TARGET = libpsmalloc.so
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -O2
 
 $(TARGET): $(OBJ)
 	$(CC) -fpic -shared -lpthread -o $@ $^
 
 $(OBJ) : $(SRC)
-	$(CC) $(CFLAGS) -fpic -lpthread -c $^
+	$(CC) $(CFLAGS) -fpic -c $^
 
 .PHONY:install
 install:
@@ -34,7 +34,7 @@ test:
 	@echo -e "\nlibc:"
 	@./test_libc 100
 	@echo -e "\npsmalloc:"
-	@./test_psmalloc 1
+	@./test_psmalloc 100
 	@rm -f test_libc test_psmalloc
 
 .PHONY:distclean

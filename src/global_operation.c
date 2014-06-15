@@ -23,11 +23,11 @@ void global_add_central(void)
         int index;
         struct central_cache *cc = NULL;
 
-        /* Initialize first central */
+        /* Initialize first central cahce */
         free_central = sbrk(central_cache_size);
         cc = free_central;
 
-        /* Initialize other central */
+        /* Initialize other central cache */
         for (index = num_of_add_central-1; index > 0; --index) {
                 cc->next = sbrk(central_cache_size);
                 cc = cc->next;
@@ -93,7 +93,7 @@ void init_before_main(void)
         /* Allocate for struct thread_cache */
         thread_slab  = sbrk(thread_slab_size);
 
-        /* Initialize global central
+        /* Initialize global central cache
            and allocate for main thread*/
         global_add_central();
         thread_init();
@@ -118,7 +118,7 @@ void thread_add_central(struct thread_cache *tc)
         if (free_central == NULL)
                 global_add_central();
         
-        /* Get first free central */
+        /* Get first free central cache */
         free_central = (new_cc = free_central)->next;
         
         pthread_mutex_unlock(&mutex);   // Unlock

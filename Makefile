@@ -30,12 +30,15 @@ install:
 .PHONY:test
 test:
 	$(CC) -lpthread $(TEST) -o test_libc
+	$(CC) -lpthread -ltcmalloc $(TEST) -o test_tcmalloc
 	$(CC) -lpthread -lpsmalloc $(TEST) -o test_psmalloc
 	@echo -e "\nlibc:"
-	@./test_libc 100
+	@./test_libc 1000
+	@echo -e "\ntcmalloc:"
+	@./test_tcmalloc 1000
 	@echo -e "\npsmalloc:"
-	@./test_psmalloc 100
-	@rm -f test_libc test_psmalloc
+	@./test_psmalloc 1000
+	@rm -f test_libc test_tcmalloc test_psmalloc
 
 .PHONY:distclean
 distclean:

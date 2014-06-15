@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
         double call_time = 0;
         int num = atoi(argv[1]);
         pthread_t tid[num];
-        int brk_start = sbrk(0);
 
         for (j=0; j<5; ++j) {
                 cl = clock();
@@ -52,7 +51,7 @@ int main(int argc, char *argv[])
                 call_time += (clock() - cl)*1000/CLOCKS_PER_SEC;
         }
         printf("time: %.2lf ms\n", call_time/5);
-        printf("mem use: %p\n", sbrk(0) - brk_start);
+        printf("heap top: %p\n", sbrk(0));
         
         _exit(0);
 }

@@ -1,5 +1,5 @@
 
-# Copyright (C) FillZpp
+# Copyright (C) 2014 FillZpp
 
 
 # Get system machine hardware

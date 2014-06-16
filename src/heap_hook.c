@@ -10,7 +10,7 @@
 #include <string.h>           // For memset, memcpy
 
 
-uint8_t check_size(size_t size, uint8_t *kind)
+uint16_t check_size(size_t size, uint16_t *kind)
 {
         int index;
         for (index=0; index<num_of_kinds-1; ++index) {
@@ -57,7 +57,7 @@ void *get_appoint_chunk(struct central_cache *cc,
 }
 
 void *get_suitable_chunk(struct thread_cache *tc,
-                                uint8_t kind, uint8_t num, size_t align,
+                                uint16_t kind, uint16_t num, size_t align,
                                 struct chunk_head *old_ch)
 {
         struct chunk_head *ch = NULL;
@@ -207,8 +207,8 @@ void *chunk_alloc_hook(struct thread_cache *tc, size_t size,
 {
         void *ret = NULL;
         struct chunk_head *ch = NULL;
-        uint8_t kind;
-        uint8_t num = check_size(size, &kind);
+        uint16_t kind;
+        uint16_t num = check_size(size, &kind);
 
         ch = get_suitable_chunk(tc, kind, num, align, NULL);
         ch->seek = size;
@@ -225,8 +225,8 @@ void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
         void *ret = NULL;
         struct chunk_head *old_ch = ptr - chunk_head_size;
         struct chunk_head *new_ch = NULL;
-        uint8_t kind;
-        uint8_t num = check_size(size, &kind);
+        uint16_t kind;
+        uint16_t num = check_size(size, &kind);
         
         new_ch = get_suitable_chunk(tc, kind, num, 0, old_ch);
         if (new_ch == old_ch) {

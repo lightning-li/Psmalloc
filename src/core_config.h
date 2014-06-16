@@ -37,10 +37,10 @@ struct central_cache {
 
 /* Each chunk has a chunk_head at the beginning */
 struct chunk_head {
+        uint16_t           kind;
+        uint16_t           num;      // 1, 2, 3 or more
+        size_t             seek;
         struct chunk_head *next;
-        uint8_t            kind;
-        uint32_t             seek;
-        uint8_t            num;      // 1, 2, 3 or more
 };
 
 /*

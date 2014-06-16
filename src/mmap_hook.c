@@ -6,7 +6,7 @@
 
 #include "mmap_hook.h"
 #include "global_operation.h"
-#include "head_hook.h"
+#include "heap_hook.h"
 #include <sys/mman.h>
 #include <string.h>
 
@@ -29,7 +29,7 @@ void *mmap_alloc_hook(struct thread_cache *tc, size_t size, int flag)
         ret = mm + 1;
         if (flag)             // realloc
                 memset(ret, 0, size);
-        printf("mmap alloc\n");
+
         return ret;
 }
 
@@ -70,5 +70,4 @@ void do_mmap_free(struct thread_cache *tc, struct chunk_head *old_mm)
                 mm->next = old_mm->next;
         }
         munmap(old_mm, old_mm->seek + chunk_head_size);
-        printf("mmap free\n");
 }

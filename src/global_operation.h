@@ -1,5 +1,12 @@
+
+/*
+ * Copyright (C) FillZpp
+ */
+
+
 #ifndef PSMALLOC_GLOBAL_OPERATION_H_
 #define PSMALLOC_GLOBAL_OPERATION_H_
+
 
 #include "core_config.h"
 

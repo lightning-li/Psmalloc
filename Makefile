@@ -1,4 +1,6 @@
-# Makefile for PSMalloc
+
+# Copyright (C) FillZpp
+
 
 # Get system machine hardware
 MACH_HARDWARE = $(shell uname -m)

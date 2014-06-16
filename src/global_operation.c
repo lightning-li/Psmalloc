@@ -1,6 +1,13 @@
+
+/*
+ * Copyright (C) FillZpp
+ */
+
+
 #include "global_operation.h"
 #include <unistd.h>
 #include <pthread.h>
+
 
 /* Pointer to allocate central_cache */
 static struct thread_cache *thread_slab = NULL;

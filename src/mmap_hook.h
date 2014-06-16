@@ -1,5 +1,12 @@
+
+/*
+ * Copyright (C) FillZpp
+ */
+
+
 #ifndef PSMALLOC_MMAP_HOOK_H_
 #define PSMALLOC_MMAP_HOOK_H_
+
 
 #include "core_config.h"
 #include <stddef.h>        // for size_t

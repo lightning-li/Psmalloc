@@ -1,12 +1,21 @@
+
+/*
+ * Copyright (C) FillZpp
+ */
+
+
 #ifndef PSMALLOC_LIBC_OVERRIDE_H_
 #define PSMALLOC_LIBC_OVERRIDE_H_
+
 
 #include "psmalloc.h"
 #include <sys/cdefs.h>        // for __THROW
 
+
 #ifndef __THROW
 #define __THROW
 #endif
+
 
 #define ALIAS(tc_fn)   __attribute__ ((alias (#tc_fn)))
 

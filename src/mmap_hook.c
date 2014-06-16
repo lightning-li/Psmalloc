@@ -1,8 +1,15 @@
+
+/*
+ * Copyright (C) FillZpp
+ */
+
+
 #include "mmap_hook.h"
 #include "global_operation.h"
 #include "head_hook.h"
 #include <sys/mman.h>
 #include <string.h>
+
 
 void *mmap_alloc_hook(struct thread_cache *tc, size_t size, int flag)
 {

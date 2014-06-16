@@ -1,20 +1,21 @@
+
 /*
-  **************************************************
+ * Copyright (C) FillZpp
+ */
 
-  Core configuration for psmalloc
-
-  **************************************************
-*/
 
 #ifndef PSMALLOC_CORE_CONFIG_H_
 #define PSMALLOC_CORE_CONFIG_H_
 
+
 #include <stdint.h>                // for uint8_t, uint16_t, uint32_t
 #include <stddef.h>                // for size_t
+
 
 /* Version of PSMalloc */
 #define __PSMALLOC__ 0
 #define __PSMALLOC_MINOR__ 1
+
 
 /*
   **************************************************

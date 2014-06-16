@@ -1,7 +1,14 @@
+
+/*
+ * Copyright (C) FillZpp
+ */
+
+
 #include "heap_hook.h"
 #include "global_operation.h"
 #include <stdint.h>
 #include <string.h>           // For memset, memcpy
+
 
 uint8_t check_size(size_t size, uint8_t *kind)
 {

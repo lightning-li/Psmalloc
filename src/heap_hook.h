@@ -1,7 +1,15 @@
+
+/*
+ * Copyright (C) FillZpp
+ */
+
+
 #ifndef PSMALLOC_HEAP_HOOK_H_
 #define PSMALLOC_HEAP_HOOK_H_
 
+
 #include "core_config.h"
+
 
 void *chunk_alloc_hook(struct thread_cache *tc,
                        size_t size, size_t align, int flag);

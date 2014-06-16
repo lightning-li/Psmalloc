@@ -1,14 +1,19 @@
-#ifndef PSMALLOC_PSMALLOC_H_
+ /*
+ * Copyright (C) FillZpp
+ */   #ifndef PSMALLOC_PSMALLOC_H_
 #define PSMALLOC_PSMALLOC_H_
+
 
 #include "core_config.h"
 #include <malloc.h>           // for struct mallinfo
 #include <sys/cdefs.h>        // for __THROW
 #include <stddef.h>           // for size_t
 
+
 #ifndef __THROW
 #define __THROW
 #endif
+
 
 void *ps_malloc(size_t size) __THROW;
 void *ps_calloc(size_t n, size_t size) __THROW;

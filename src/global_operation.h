@@ -20,5 +20,8 @@ void thread_add_central(struct thread_cache *tc);
 /* Return current thread */
 struct thread_cache *get_current_thread(void);
 
+/* Find out which central is a pointer in */
+struct central_cache *find_central_of_pointer(void *ptr);
+
 
 #endif

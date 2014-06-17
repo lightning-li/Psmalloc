@@ -8,6 +8,7 @@
 #define PSMALLOC_CORE_CONFIG_H_
 
 
+#include <pthread.h>
 #include <stdint.h>                // for uint8_t, uint16_t, uint32_t
 #include <stddef.h>                // for size_t
 
@@ -25,14 +26,17 @@
 /* Each thread has a thread_cache_struct */
 struct thread_cache {
         struct central_cache *cc;   // central caches allocated for this thread
-        struct chunk_head    *mm;   // mmap chunks
         struct thread_cache  *next;
 };
 
 /* Each central has a central_cache at the beginning */
 struct central_cache {
+        pthread_mutex_t      central_mutex;
+        struct chunk_head    *wait_free_chunk;
         struct chunk_head    *free_chunk;
+        struct central_cache *used_next;
         struct central_cache *next;
+        struct thread_cache  *tc;
 };
 
 /* Each chunk has a chunk_head at the beginning */

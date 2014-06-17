@@ -7,16 +7,16 @@
 #include "heap_hook.h"
 #include "global_operation.h"
 #include <stdint.h>
-#include <string.h>           // For memset, memcpy
+#include <string.h>           // For memcpy
+#include <pthread.h>
 
 
 uint16_t check_size(size_t size, uint16_t *kind)
 {
         int index;
         for (index=0; index<num_of_kinds-1; ++index) {
-                if (size <= (3*chunk_size[index] - chunk_head_size)) {
+                if (size <= (3*chunk_size[index] - chunk_head_size))
                         break;
-                }
         }
         *kind = index;
         return (size+chunk_head_size)/chunk_size[index] + 1;
@@ -67,7 +67,7 @@ void *get_suitable_chunk(struct thread_cache *tc,
         int index;
 
         if (old_ch != NULL) {           // realloc
-                cc = find_central_of_pointer(tc, old_ch);
+                cc = find_central_of_pointer(old_ch);
                 if (old_ch->kind == kind) {                     // Same kind
                         if (old_ch->num == num) {           // Same num
                                 return old_ch;
@@ -75,7 +75,7 @@ void *get_suitable_chunk(struct thread_cache *tc,
                                 ch = (void*)old_ch + tar_size;
                                 ch->kind = kind;
                                 ch->num = old_ch->num - num;
-                                do_chunk_free(cc,ch);
+                                do_chunk_free(cc, ch);
                                 
                                 old_ch->num = num;
                                 return old_ch;
@@ -155,76 +155,82 @@ void *get_suitable_chunk(struct thread_cache *tc,
         return ch;
 }
 
-struct central_cache *find_central_of_pointer(struct thread_cache *tc,
-                                              void *ptr)
-{
-        struct central_cache *cc = tc->cc;
-        while (cc != NULL) {
-                if (ptr>(void*)cc && ptr<(void*)cc+central_cache_size)
-                        break;
-                cc = cc->next;
-        }
-        return cc;
-}
-
 void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
 {
-        struct chunk_head *prev_ch = cc->free_chunk;
-        struct chunk_head *next_ch = prev_ch;
-        ch->seek = chunk_size[ch->kind] * ch->num;
-        ch->next = NULL;
+        struct chunk_head *prev_ch = NULL;
+        struct chunk_head *next_ch = NULL;
 
-        for (; next_ch!=NULL; prev_ch=next_ch, next_ch=next_ch->next) {
-                if (next_ch > ch)
+        pthread_mutex_lock(&cc->central_mutex);                  // Lock
+
+        /* If this thread is not the owner of this cc */
+        if (cc->tc!=NULL && get_current_thread() != cc->tc) {
+                ch->next = cc->wait_free_chunk;
+                cc->wait_free_chunk = ch;
+                pthread_mutex_unlock(&cc->central_mutex);        // Unlock
+                return;
+        }
+
+        while (1) {
+                prev_ch = cc->free_chunk;
+                next_ch = prev_ch;
+                ch->seek = chunk_size[ch->kind] * ch->num;
+                ch->next = NULL;
+
+                for (; next_ch!=NULL; prev_ch=next_ch, next_ch=next_ch->next) {
+                        if (next_ch > ch)
+                                break;
+                }
+
+                /* Check arround target chunk */
+                if (next_ch == cc->free_chunk) {
+                        cc->free_chunk = ch;
+                } else {
+                        if ((size_t)ch-(size_t)prev_ch == prev_ch->seek) {
+                                prev_ch->seek +=  ch->seek;
+                                ch = prev_ch;
+                        } else {
+                                ch->next = prev_ch->next;
+                                prev_ch->next = ch;
+                        }
+                }
+                
+                if (next_ch != NULL) {
+                        if ((size_t)next_ch-(size_t)ch == ch->seek) {
+                                ch->seek += next_ch->seek;
+                                ch->next = next_ch->next;
+                        } else {
+                                ch->next = next_ch;
+                        }
+                }
+
+                /* Check wait_free_chunk */
+                if ((ch = cc->wait_free_chunk) != NULL)
+                        cc->wait_free_chunk = ch->next;
+                else 
                         break;
         }
-
-        /* Check arround target chunk */
-        if (next_ch == cc->free_chunk) {
-                cc->free_chunk = ch;
-        } else {
-                if ((size_t)ch-(size_t)prev_ch == prev_ch->seek) {
-                        prev_ch->seek +=  ch->seek;
-                        ch = prev_ch;
-                } else {
-                        ch->next = prev_ch->next;
-                        prev_ch->next = ch;
-                }
-        }
-                
-        if (next_ch != NULL) {
-                if ((size_t)next_ch-(size_t)ch == ch->seek) {
-                        ch->seek += next_ch->seek;
-                        ch->next = next_ch->next;
-                } else {
-                        ch->next = next_ch;
-                }
-        }
+        pthread_mutex_unlock(&cc->central_mutex);                // Unlock
 }
 
-void *chunk_alloc_hook(struct thread_cache *tc, size_t size,
-                               size_t align, int flag)
+void *chunk_alloc_hook(size_t size, size_t align)
 {
-        void *ret = NULL;
         struct chunk_head *ch = NULL;
+        struct thread_cache *tc = get_current_thread();
         uint16_t kind;
         uint16_t num = check_size(size, &kind);
 
         ch = get_suitable_chunk(tc, kind, num, align, NULL);
         ch->seek = size;
-        ret = ch + 1;
         
-        if (flag)        // calloc
-                memset(ret, 0, size);
-
-        return ret;
+        return ch + 1;
 }
 
-void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
+void *chunk_realloc_hook(void *ptr, size_t size)
 {
         void *ret = NULL;
         struct chunk_head *old_ch = ptr - chunk_head_size;
         struct chunk_head *new_ch = NULL;
+        struct thread_cache *tc = get_current_thread();
         uint16_t kind;
         uint16_t num = check_size(size, &kind);
         
@@ -234,7 +240,7 @@ void *chunk_realloc_hook(struct thread_cache *tc, void *ptr, size_t size)
         } else {
                 ret = new_ch + 1;
                 memcpy(ret, ptr, old_ch->seek);
-                do_chunk_free(find_central_of_pointer(tc, old_ch), old_ch);
+                do_chunk_free(find_central_of_pointer(old_ch), old_ch);
         }
 
         new_ch->seek = size;

@@ -12,11 +12,11 @@
 #include <stddef.h>        // for size_t
 
 
-void *mmap_alloc_hook(struct thread_cache *tc, size_t size, int flag);
+void *mmap_alloc_hook(size_t size);
 
-void *mmap_realloc_hook(struct thread_cache *tc, void *ptr, size_t size);
+void *mmap_realloc_hook(void *ptr, size_t size);
 
-void do_mmap_free(struct thread_cache *tc, struct chunk_head *old_mm);
+void do_mmap_free(struct chunk_head *old_mm);
 
 
 #endif

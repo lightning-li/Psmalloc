@@ -36,7 +36,6 @@ void func(void)
 
         for (i=0; i<num; ++i)
                 free(p2[i]);
-
         pthread_exit(0);
 }
 

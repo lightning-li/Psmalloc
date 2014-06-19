@@ -4,8 +4,8 @@
  */
 
 
-#ifndef PSMALLOC_PSMALLOC_H_
-#define PSMALLOC_PSMALLOC_H_
+#ifndef _PSMALLOC_PSMALLOC_H
+#define _PSMALLOC_PSMALLOC_H
 
 
 #include "core_config.h"

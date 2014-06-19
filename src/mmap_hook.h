@@ -4,8 +4,8 @@
  */
 
 
-#ifndef PSMALLOC_MMAP_HOOK_H_
-#define PSMALLOC_MMAP_HOOK_H_
+#ifndef _PSMALLOC_MMAP_HOOK_H
+#define _PSMALLOC_MMAP_HOOK_H
 
 
 #include "core_config.h"

@@ -4,8 +4,8 @@
  */
 
 
-#ifndef PSMALLOC_GLOBAL_OPERATION_H_
-#define PSMALLOC_GLOBAL_OPERATION_H_
+#ifndef _PSMALLOC_GLOBAL_OPERATION_H
+#define _PSMALLOC_GLOBAL_OPERATION_H
 
 
 #include "core_config.h"

@@ -1,4 +1,3 @@
-
 # Copyright (C) 2014 FillZpp
 
 
@@ -12,7 +11,7 @@ endif
 
 DIR_SRC = ./src
 SRC = $(wildcard ${DIR_SRC}/*.c)
-OBJ = $(patsubst %.c, %.o, $(notdir ${SRC}))
+OBJ = $(patsubst %.c, %.o, $(notdir $(SRC)))
 TEST = ./test/test.c
 
 CC = gcc

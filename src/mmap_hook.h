@@ -1,4 +1,3 @@
-
 /* 
  * Copyright (C) FillZpp
  */
@@ -12,11 +11,11 @@
 #include <stddef.h>        // for size_t
 
 
-void *mmap_alloc_hook(size_t size);
+void *mmap_alloc_hook (size_t size);
 
-void *mmap_realloc_hook(void *ptr, size_t size);
+void *mmap_realloc_hook (void *ptr, size_t size);
 
-void do_mmap_free(struct chunk_head *old_mm);
+void do_mmap_free (struct chunk_head *old_mm);
 
 
 #endif

@@ -1,4 +1,3 @@
-
 /* 
  * Copyright (C) 2014 FillZpp
  */
@@ -27,7 +26,7 @@ static pthread_key_t tkey;
 /* Mutex when global get central cache */
 static pthread_mutex_t mutex;
 
-void central_init(struct central_cache *cc)
+void central_init (struct central_cache *cc)
 {
         pthread_mutex_init(&cc->central_mutex, NULL);
         cc->used_next = NULL;
@@ -37,7 +36,7 @@ void central_init(struct central_cache *cc)
         cc->free_chunk->next = NULL;
 }
 
-void global_add_central(void)
+void global_add_central (void)
 {
         int index;
         struct central_cache *cc = NULL;
@@ -56,7 +55,7 @@ void global_add_central(void)
         cc->next = NULL;
 }
 
-void thread_destructor(void *ptr)
+void thread_destructor (void *ptr)
 {
         struct thread_cache *tc = ptr;
         struct central_cache *cc = tc->cc;
@@ -93,7 +92,7 @@ void thread_destructor(void *ptr)
         pthread_mutex_unlock(&mutex);   // Unlock
 }
 
-struct thread_cache *thread_init(void)
+struct thread_cache *thread_init (void)
 {
         struct central_cache *cc = NULL;
         struct thread_cache *tc  = NULL;
@@ -130,7 +129,7 @@ struct thread_cache *thread_init(void)
         return tc;
 }
 
-void init_before_main(void)
+void init_before_main (void)
 {
         /* Initialize mutex, tkey */
         pthread_mutex_init(&mutex, NULL);
@@ -144,7 +143,7 @@ void init_before_main(void)
         thread_init();
 }
 
-void thread_add_central(struct thread_cache *tc)
+void thread_add_central (struct thread_cache *tc)
 {
         struct central_cache *new_cc = NULL;
 
@@ -168,7 +167,7 @@ void thread_add_central(struct thread_cache *tc)
         tc->cc = new_cc;
 }
 
-struct thread_cache *get_current_thread(void)
+struct thread_cache *get_current_thread (void)
 {
         struct thread_cache *tc = pthread_getspecific(tkey);
         
@@ -178,7 +177,7 @@ struct thread_cache *get_current_thread(void)
         return tc;
 }
 
-struct central_cache *find_central_of_pointer(void *ptr)
+struct central_cache *find_central_of_pointer (void *ptr)
 {
         struct central_cache *cc = used_central;
 

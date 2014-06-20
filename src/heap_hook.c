@@ -1,4 +1,3 @@
-
 /* 
  * Copyright (C) 2014 FillZpp
  */
@@ -11,7 +10,7 @@
 #include <pthread.h>
 
 
-uint16_t check_size(size_t size, uint16_t *kind)
+uint16_t check_size (size_t size, uint16_t *kind)
 {
         int index;
         for (index=0; index<num_of_kinds-1; ++index) {
@@ -22,8 +21,8 @@ uint16_t check_size(size_t size, uint16_t *kind)
         return (size+chunk_head_size)/chunk_size[index] + 1;
 }
 
-void *get_appoint_chunk(struct central_cache *cc,
-                               size_t tar_size, void *ptr)
+void *get_appoint_chunk (struct central_cache *cc,
+                         size_t tar_size, void *ptr)
 {
         struct chunk_head *ch = cc->free_chunk;
         struct chunk_head *prev_ch = ch;
@@ -56,9 +55,9 @@ void *get_appoint_chunk(struct central_cache *cc,
         return ch;
 }
 
-void *get_suitable_chunk(struct thread_cache *tc,
-                                uint16_t kind, uint16_t num, size_t align,
-                                struct chunk_head *old_ch)
+void *get_suitable_chunk (struct thread_cache *tc,
+                          uint16_t kind, uint16_t num, size_t align,
+                          struct chunk_head *old_ch)
 {
         struct chunk_head *ch = NULL;
         struct chunk_head *prev_ch = NULL;
@@ -155,7 +154,7 @@ void *get_suitable_chunk(struct thread_cache *tc,
         return ch;
 }
 
-void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
+void do_chunk_free (struct central_cache *cc,struct chunk_head *ch)
 {
         struct chunk_head *prev_ch = NULL;
         struct chunk_head *next_ch = NULL;
@@ -212,7 +211,7 @@ void do_chunk_free(struct central_cache *cc,struct chunk_head *ch)
         pthread_mutex_unlock(&cc->central_mutex);                // Unlock
 }
 
-void *chunk_alloc_hook(size_t size, size_t align)
+void *chunk_alloc_hook (size_t size, size_t align)
 {
         struct chunk_head *ch = NULL;
         struct thread_cache *tc = get_current_thread();
@@ -225,7 +224,7 @@ void *chunk_alloc_hook(size_t size, size_t align)
         return ch + 1;
 }
 
-void *chunk_realloc_hook(void *ptr, size_t size)
+void *chunk_realloc_hook (void *ptr, size_t size)
 {
         void *ret = NULL;
         struct chunk_head *old_ch = ptr - chunk_head_size;

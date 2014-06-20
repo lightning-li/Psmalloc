@@ -1,4 +1,3 @@
-
 /* 
  * Copyright (C) 2014 FillZpp
  */
@@ -12,16 +11,16 @@
 
 
 /* Global initialize before main function */
-static void init_before_main(void) __attribute__((constructor));
+static void init_before_main (void)  __attribute__((constructor));
 
 /* Add a central cache for a thread */
-void thread_add_central(struct thread_cache *tc);
+void thread_add_central (struct thread_cache *tc);
 
 /* Return current thread */
-struct thread_cache *get_current_thread(void);
+struct thread_cache *get_current_thread (void);
 
 /* Find out which central is a pointer in */
-struct central_cache *find_central_of_pointer(void *ptr);
+struct central_cache *find_central_of_pointer (void *ptr);
 
 
 #endif

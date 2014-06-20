@@ -1,4 +1,3 @@
-
 /* 
  * Copyright (C) 2014 FillZpp
  */
@@ -11,7 +10,7 @@
 #include <string.h>
 
 
-void *mmap_alloc_hook(size_t size)
+void *mmap_alloc_hook (size_t size)
 {
         struct chunk_head *mm = NULL;
 
@@ -23,7 +22,7 @@ void *mmap_alloc_hook(size_t size)
         return mm + 1;
 }
 
-void *mmap_realloc_hook(void *ptr, size_t size)
+void *mmap_realloc_hook (void *ptr, size_t size)
 {
         struct chunk_head *new_mm = NULL;
         // It could be in mmap or central
@@ -46,7 +45,7 @@ void *mmap_realloc_hook(void *ptr, size_t size)
         return new_mm + 1;
 }
 
-void do_mmap_free(struct chunk_head *old_mm)
+void do_mmap_free (struct chunk_head *old_mm)
 {
         munmap(old_mm, old_mm->seek + chunk_head_size);
 }

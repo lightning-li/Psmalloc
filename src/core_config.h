@@ -68,11 +68,13 @@ static const size_t num_of_add_central = 4;
 static const uint8_t num_of_kinds = 5;
 
 /* Size of four kinds of chunk in each thread */
-static const size_t chunk_size[] = {64,          // 64 Bytes
-                                    256,         // 256 Bytes
-                                    1024,        // 1 KB
-                                    1024*4,      // 4 KB
-                                    1024*16};    // 16 KB
+static const size_t chunk_size[] = {
+        64,          // 64 Bytes
+        256,         // 256 Bytes
+        1024,        // 1 KB
+        1024*4,      // 4 KB
+        1024*16      // 16 KB
+};
 
 /* Critical size
    Allocation more than this size should use mmap */

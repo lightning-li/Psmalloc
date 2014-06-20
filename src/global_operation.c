@@ -4,7 +4,7 @@
 
 
 #include "global_operation.h"
-#include <unistd.h>
+#include <unistd.h>                // For sbrk, getpagesize
 #include <pthread.h>
 
 
@@ -36,13 +36,26 @@ void central_init (struct central_cache *cc)
         cc->free_chunk->next = NULL;
 }
 
+void *get_align_brk ()
+{
+        int page_size = getpagesize();
+        int current_brk = sbrk(0);
+        int remainder = current_brk % page_size;
+
+        /* Check if current brk aligns with page size */
+        if (remainder != 0)
+                sbrk(page_size - remainder);
+        
+        return sbrk(central_cache_size);
+}
+
 void global_add_central (void)
 {
         int index;
         struct central_cache *cc = NULL;
 
         /* Initialize first central cahce */
-        free_central = sbrk(central_cache_size);
+        free_central = get_align_brk();
         cc = free_central;
         central_init(cc);
 

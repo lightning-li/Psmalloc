@@ -8,7 +8,7 @@
 #include "heap_hook.h"
 #include "mmap_hook.h"
 #include "libc_override.h"
-#include <unistd.h>           // For getpagesize()
+#include <unistd.h>           // For getpagesize
 #include <string.h>           // For memset
 
 

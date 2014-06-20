@@ -18,7 +18,7 @@ void *do_malloc(size_t size, size_t align)
         void *ret = NULL;
 
         /* Check size */
-        if (size == 0)
+        if (size <= 0)
                 return NULL;
 
         if (size < critical_size)
@@ -90,7 +90,7 @@ void *ps_realloc(void *ptr, size_t size)
                 return ret;
         }
         /* Check size */
-        if (size == 0) {
+        if (size <= 0) {
                 do_free(ptr);
                 return NULL;
         }

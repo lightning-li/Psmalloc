@@ -136,7 +136,9 @@ struct thread_cache *thread_init (void)
         pthread_mutex_unlock(&mutex);   // Unlock
         
         cc->next = NULL;
+        pthread_mutex_lock(&cc->central_mutex);
         cc->tc = tc;
+        pthread_mutex_unlock(&cc->central_mutex);
         tc->cc = cc;
         
         return tc;
@@ -175,7 +177,9 @@ void thread_add_central (struct thread_cache *tc)
         pthread_mutex_unlock(&mutex);   // Unlock
 
         new_cc->next = NULL;
+        pthread_mutex_lock(&new_cc->central_mutex);
         new_cc->tc = tc;
+        pthread_mutex_unlock(&new_cc->central_mutex);
         new_cc->next = tc->cc;
         tc->cc = new_cc;
 }

@@ -1,32 +1,41 @@
 # Copyright (C) 2014 FillZpp
 
 
-# Get system machine hardware
-MACH_HARDWARE = $(shell uname -m)
-ifeq ($(MACH_HARDWARE), x86_64)
-SYS_LIB_DIR = /usr/lib64
-else
-SYS_LIB_DIR = /usr/lib
-endif
-
 DIR_SRC = ./src
 SRC = $(wildcard ${DIR_SRC}/*.c)
 OBJ = $(patsubst %.c, %.o, $(notdir $(SRC)))
 TEST = ./test/test.c
 
+SYS_LIB_DIR = /usr/lib
 CC = gcc
-TARGET = libpsmalloc.so
+LD = ld
 CFLAGS = -g -Wall -O2
+TARGET = libpsmalloc.so
+MIN_TARGET = libpsmalloc_minimal.so
+
+MAJOR_V = 0
+MINOR_V = 1
+
+all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CC) -fpic -shared -lpthread -o $@ $^
+	$(LD) -shared -soname $(TARGET) -o $@ $^
 
 $(OBJ) : $(SRC)
 	$(CC) $(CFLAGS) -fpic -c $^
 
+
 .PHONY:install
 install:
-	mv $(TARGET) $(SYS_LIB_DIR)
+	strip $(TARGET) -S -o $(MIN_TARGET)
+	rm -f $(SYS_LIB_DIR)/$(TARGET)* $(SYS_LIB_DIR)/$(MIN_TARGET)*
+	cp $(TARGET) $(SYS_LIB_DIR)/$(TARGET).$(MAJOR_V).$(MINOR_V)
+	ln -s $(SYS_LIB_DIR)/$(TARGET).$(MAJOR_V).$(MINOR_V) $(SYS_LIB_DIR)/$(TARGET).$(MAJOR_V)
+	ln -s $(SYS_LIB_DIR)/$(TARGET).$(MAJOR_V).$(MINOR_V) $(SYS_LIB_DIR)/$(TARGET)
+	cp $(MIN_TARGET) $(SYS_LIB_DIR)/$(MIN_TARGET).$(MAJOR_V).$(MINOR_V)
+	ln -s $(SYS_LIB_DIR)/$(MIN_TARGET).$(MAJOR_V).$(MINOR_V) $(SYS_LIB_DIR)/$(MIN_TARGET).$(MAJOR_V)
+	ln -s $(SYS_LIB_DIR)/$(MIN_TARGET).$(MAJOR_V).$(MINOR_V) $(SYS_LIB_DIR)/$(MIN_TARGET)
+
 
 .PHONY:test
 test:
@@ -41,10 +50,12 @@ test:
 	@./test_psmalloc 100
 	@rm -f test_libc test_tcmalloc test_psmalloc
 
+
 .PHONY:distclean
 distclean:
 	rm -f *.o
 
+
 .PHONY:clean
 clean:
-	rm -f *.o *.so *.test
+	rm -f *.o *.so

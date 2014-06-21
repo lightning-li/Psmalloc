@@ -58,6 +58,6 @@ int main(int argc, char *argv[])
         }
         printf("time: %.2lf ms\n", call_time/5);
         printf("heap top: %p\n", sbrk(0));
-        
+
         return 0;
 }

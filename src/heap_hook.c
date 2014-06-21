@@ -154,7 +154,7 @@ void *get_suitable_chunk (struct thread_cache *tc,
         return ch;
 }
 
-void do_chunk_free (struct central_cache *cc,struct chunk_head *ch)
+void do_chunk_free (struct central_cache *cc, struct chunk_head *ch)
 {
         struct chunk_head *prev_ch = NULL;
         struct chunk_head *next_ch = NULL;

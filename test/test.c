@@ -17,24 +17,19 @@ void func(void)
         void *p1[num];
         void *p2[num];
 
-        for (i=0; i<num; ++i) {
+        for (i=0; i<num; ++i)
                 p1[i] = malloc(i*i*100 + 100);
-        }
-
         for (i=0; i<num; ++i)
                 p1[i] = realloc(p1[i], i*i*100 + 200);
-        
         for (i=0; i<num; ++i)
                 p2[i] = malloc(i*i*100 + 100);
-
         for (i=0; i<num; ++i)
                 free(p1[i]);
-        
         for (i=0; i<num; ++i)
                 p2[i] = realloc(p2[i], i*i*100 + 60);
-
         for (i=0; i<num; ++i)
                 free(p2[i]);
+        
         pthread_exit(0);
 }
 
@@ -54,7 +49,8 @@ int main(int argc, char *argv[])
                 for (i=0; i<num; ++i)
                         pthread_join(tid[i], NULL);
                 
-                call_time += (clock() - cl)*1000/CLOCKS_PER_SEC;
+                call_time += (clock() - cl) * 1000
+                        /CLOCKS_PER_SEC;
         }
         printf("time: %.2lf ms\n", call_time/5);
         printf("heap top: %p\n", sbrk(0));

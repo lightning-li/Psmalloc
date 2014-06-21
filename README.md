@@ -1,4 +1,4 @@
-PSMalloc
+Psmalloc
 ========
 
 ###Pursue Speed Malloc

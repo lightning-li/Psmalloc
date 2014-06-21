@@ -65,7 +65,7 @@ static const size_t central_cache_size  = 1024*512;  // 512 KB
 static const size_t num_of_add_central = 4;
 
 /* Num of kinds */
-static const uint8_t num_of_kinds = 5;
+static const size_t num_of_kinds = 5;
 
 /* Size of four kinds of chunk in each thread */
 static const size_t chunk_size[] = {

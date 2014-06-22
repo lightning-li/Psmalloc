@@ -31,7 +31,7 @@ void central_init (struct central_cache *cc)
         pthread_mutex_init(&cc->central_mutex, NULL);
         cc->used_next = NULL;
         cc->wait_free_chunk = NULL;
-        cc->free_chunk = (void*)cc + chunk_size[1];
+        cc->free_chunk = (void*)cc + chunk_size[1] - chunk_head_size;
         cc->free_chunk->seek = central_cache_size - chunk_size[1];
         cc->free_chunk->next = NULL;
 }

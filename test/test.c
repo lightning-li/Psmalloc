@@ -43,12 +43,13 @@ int main(int argc, char *argv[])
 
         for (j=0; j<5; ++j) {
                 cl = clock();
+
                 for (i=0; i<num; ++i)
                         pthread_create(&tid[i], NULL, (void*)func, NULL);
 
                 for (i=0; i<num; ++i)
                         pthread_join(tid[i], NULL);
-                
+
                 call_time += (clock() - cl) * 1000
                         /CLOCKS_PER_SEC;
         }

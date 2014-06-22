@@ -64,6 +64,9 @@ void *get_suitable_chunk (struct thread_cache *tc,
         struct central_cache *cc = NULL;
         size_t tar_size = chunk_size[kind] * num;
         int index;
+        size_t ali_num;
+        if (align != 0 && (ali_num = align%chunk_size[0]))
+                align = (align - ali_num) * 2;
 
         if (old_ch != NULL) {           // realloc
                 cc = find_central_of_pointer(old_ch);
@@ -117,8 +120,22 @@ void *get_suitable_chunk (struct thread_cache *tc,
                 ch = prev_ch;
                 /* Find in free chunks */
                 for (; ch != NULL; prev_ch=ch, ch=ch->next) {
-                        if (ch->seek >= tar_size)
+                        if (ch->seek < tar_size)
+                                continue;
+                        if (!align || !(ali_num = (size_t)(ch+1)%align))
                                 break;
+                        
+                        /* Check alignment and size */
+                        if (ch->seek < tar_size + align - ali_num)
+                                continue;
+                        ali_num = ch->seek + ali_num - align;
+                        ch->seek = ch->seek - ali_num;
+                        prev_ch = ch;
+                        ch = (void*)ch + ch->seek;
+                        ch->seek = ali_num;
+                        ch->next = prev_ch->next;
+                        prev_ch->next = ch;
+                        break;
                 }
                 if (ch != NULL)
                         break;

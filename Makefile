@@ -14,15 +14,15 @@ TARGET = libpsmalloc.so
 MIN_TARGET = libpsmalloc_minimal.so
 MAJOR_V = 0
 MINOR_V = 1
-THREAD_NUM = 1000
+THREAD_NUM = 100
 
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(LD) -shared -soname $(TARGET) -o $@ $^
+	$(LD) -shared -lpthread -soname $(TARGET) -o $@ $^
 
 $(OBJ) : $(SRC)
-	$(CC) $(CFLAGS) -fpic -c $^
+	$(CC) $(CFLAGS) -fpic -lpthread -c $^
 
 
 .PHONY:install

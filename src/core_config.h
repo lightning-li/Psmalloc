@@ -22,7 +22,7 @@
   Define structs
   **************************************************
 */
-/* Each thread has a thread_cache_struct */
+/* Each thread has a thread_cache */
 struct thread_cache {
         struct central_cache *cc;   // central caches allocated for this thread
         struct thread_cache  *next;

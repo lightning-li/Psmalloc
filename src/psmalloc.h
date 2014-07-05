@@ -8,7 +8,7 @@
 
 
 #include "core_config.h"
-//#include <malloc.h>           // for struct mallinfo
+#include <malloc.h>           // for struct mallinfo
 #include <sys/cdefs.h>        // for __THROW
 #include <stddef.h>           // for size_t
 

@@ -8,25 +8,106 @@
 #include <pthread.h>
 
 
-/* Pointer to allocate central_cache */
+/* =================================================================== */
+/*                Definitions for static variables                     */
+/* =================================================================== */
+
 static struct thread_cache *thread_slab = NULL;
-
-/* List of free thread_cache */
 static struct thread_cache *free_thread = NULL;
-
-/* List of central_cache being used */
 static struct central_cache *used_central = NULL;
-
-/* List of free central_cache */
 static struct central_cache *free_central = NULL;
-
-/* Key to get thread cache */
 static pthread_key_t tkey;
-
-/* Mutex when global get central cache */
 static pthread_mutex_t mutex;
+static pthread_once_t once = PTHREAD_ONCE_INIT;
 
-void central_init (struct central_cache *cc)
+
+/* =================================================================== */
+/*                Declaration for static functions                     */
+/* =================================================================== */
+
+static void central_init(struct central_cache *cc);
+static void *get_align_brk(void);
+static void global_add_central (void);
+static void thread_destructor (void *ptr);
+static struct thread_cache *thread_init (void);
+static void init_once(void);
+static void func_before_main(void)  __attribute__((constructor));
+
+
+/* =================================================================== */
+/*                Definitions for global operations                    */
+/* =================================================================== */
+
+struct thread_cache *get_current_thread(void)
+{
+        pthread_once(&once, init_once);
+        struct thread_cache *tc = pthread_getspecific(tkey);
+        
+        if (tc == NULL)
+                tc = thread_init();
+        
+        return tc;
+}
+
+void thread_add_central(struct thread_cache *tc)
+{
+        struct central_cache *new_cc = NULL;
+
+        pthread_mutex_lock(&mutex);     // Lock
+        
+        /* Check if there is free central cache */
+        if (free_central == NULL)
+                global_add_central();
+        
+        /* Get first free central cache */
+        free_central = (new_cc = free_central)->next;
+        /* Add this central cache to used_central */
+        new_cc->used_next = used_central;
+        used_central = new_cc;
+        
+        pthread_mutex_unlock(&mutex);   // Unlock
+
+        new_cc->next = NULL;
+        pthread_mutex_lock(&new_cc->central_mutex);
+        new_cc->tc = tc;
+        pthread_mutex_unlock(&new_cc->central_mutex);
+        new_cc->next = tc->cc;
+        tc->cc = new_cc;
+}
+
+struct central_cache *find_central_of_pointer(void *ptr)
+{
+        struct central_cache *cc = used_central;
+
+        // Check if pointer is in heap
+        if ((int)ptr > sbrk(0))
+                return NULL;
+        
+        while (cc != NULL) {
+                if (ptr>(void*)cc && ptr<(void*)cc+central_cache_size)
+                        break;
+                cc = cc->used_next;
+        }
+
+        if (cc == NULL) {
+                cc = free_central;
+                while (cc != NULL) {
+                        if (ptr>(void*)cc && ptr<(void*)cc+central_cache_size)
+                                break;
+                        cc = cc->next;
+                }
+        }
+                        
+        return cc;
+}
+
+
+/* =================================================================== */
+/*                 Definitions for static functions                    */
+/* =================================================================== */
+
+/* Initialize a central cache when get it from system */
+static void central_init(struct central_cache *cc)
 {
         pthread_mutex_init(&cc->central_mutex, NULL);
         cc->used_next = NULL;
@@ -36,7 +117,7 @@ void central_init (struct central_cache *cc)
         cc->free_chunk->next = NULL;
 }
 
-void *get_align_brk ()
+static void *get_align_brk(void)
 {
         int page_size = getpagesize();
         int current_brk = sbrk(0);
@@ -49,7 +130,7 @@ void *get_align_brk ()
         return sbrk(central_cache_size);
 }
 
-void global_add_central (void)
+static void global_add_central(void)
 {
         int index;
         struct central_cache *cc = NULL;
@@ -68,7 +149,7 @@ void global_add_central (void)
         cc->next = NULL;
 }
 
-void thread_destructor (void *ptr)
+static void thread_destructor(void *ptr)
 {
         struct thread_cache *tc = ptr;
         struct central_cache *cc = tc->cc;
@@ -105,7 +186,7 @@ void thread_destructor (void *ptr)
         pthread_mutex_unlock(&mutex);   // Unlock
 }
 
-struct thread_cache *thread_init (void)
+static struct thread_cache *thread_init(void)
 {
         struct central_cache *cc = NULL;
         struct thread_cache *tc  = NULL;
@@ -144,7 +225,7 @@ struct thread_cache *thread_init (void)
         return tc;
 }
 
-void init_before_main (void)
+static void init_once(void)
 {
         /* Initialize mutex, tkey */
         pthread_mutex_init(&mutex, NULL);
@@ -158,65 +239,8 @@ void init_before_main (void)
         thread_init();
 }
 
-void thread_add_central (struct thread_cache *tc)
+static void func_before_main(void)
 {
-        struct central_cache *new_cc = NULL;
-
-        pthread_mutex_lock(&mutex);     // Lock
-        
-        /* Check if there is free central cache */
-        if (free_central == NULL)
-                global_add_central();
-        
-        /* Get first free central cache */
-        free_central = (new_cc = free_central)->next;
-        /* Add this central cache to used_central */
-        new_cc->used_next = used_central;
-        used_central = new_cc;
-        
-        pthread_mutex_unlock(&mutex);   // Unlock
-
-        new_cc->next = NULL;
-        pthread_mutex_lock(&new_cc->central_mutex);
-        new_cc->tc = tc;
-        pthread_mutex_unlock(&new_cc->central_mutex);
-        new_cc->next = tc->cc;
-        tc->cc = new_cc;
-}
-
-struct thread_cache *get_current_thread (void)
-{
-        struct thread_cache *tc = pthread_getspecific(tkey);
-        
-        if (tc == NULL)
-                tc = thread_init();
-        
-        return tc;
-}
-
-struct central_cache *find_central_of_pointer (void *ptr)
-{
-        struct central_cache *cc = used_central;
-
-        // Check if pointer is in heap
-        if ((int)ptr > sbrk(0))
-                return NULL;
-        
-        while (cc != NULL) {
-                if (ptr>(void*)cc && ptr<(void*)cc+central_cache_size)
-                        break;
-                cc = cc->used_next;
-        }
-
-        if (cc == NULL) {
-                cc = free_central;
-                while (cc != NULL) {
-                        if (ptr>(void*)cc && ptr<(void*)cc+central_cache_size)
-                                break;
-                        cc = cc->next;
-                }
-        }
-                        
-        return cc;
+        pthread_once(&once, init_once);
 }
 

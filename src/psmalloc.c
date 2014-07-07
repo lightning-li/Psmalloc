@@ -37,7 +37,6 @@ void do_free (void *ptr)
                 return;
 
         cc = find_central_of_pointer(ptr);
-        
         if (cc != NULL)
                 do_chunk_free(cc, ptr - chunk_head_size);
         else 

@@ -8,8 +8,8 @@
 
 
 #include <pthread.h>
-#include <stdint.h>                // for uint8_t, uint16_t, uint32_t
-#include <stddef.h>                // for size_t
+#include <stdint.h>           /* for uint8_t, uint16_t, uint32_t */
+#include <stddef.h>           /* for size_t */
 
 
 /* Version of PSMalloc */
@@ -22,9 +22,10 @@
   Define structs
   **************************************************
 */
+
 /* Each thread has a thread_cache */
 struct thread_cache {
-        struct central_cache *cc;   // central caches allocated for this thread
+        struct central_cache *cc;     /* central caches allocated for this thread */
         struct thread_cache  *next;
 };
 
@@ -41,10 +42,11 @@ struct central_cache {
 /* Each chunk has a chunk_head at the beginning */
 struct chunk_head {
         uint16_t           kind;
-        uint16_t           num;      // 1, 2, 3 or more
+        uint16_t           num;
         size_t             seek;
         struct chunk_head *next;
 };
+
 
 /*
   **************************************************
@@ -54,16 +56,12 @@ struct chunk_head {
 
 /* Size of chunk_head */
 static const size_t chunk_head_size = sizeof(struct chunk_head);
-
 /* Size of slab for central and thread struct */
 static const size_t thread_slab_size    = 500 * sizeof(struct thread_cache);
-
 /* Size of each central cache */
 static const size_t central_cache_size  = 1024*512;  // 512 KB
-
 /* The number of central caches when add */
 static const size_t num_of_add_central = 4;
-
 /* Num of kinds */
 static const size_t num_of_kinds = 5;
 

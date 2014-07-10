@@ -3,8 +3,8 @@
  */
 
 
-#ifndef _PSMALLOC_LIBC_OVERRIDE_H
-#define _PSMALLOC_LIBC_OVERRIDE_H
+#ifndef PSMALLOC_LIBC_OVERRIDE_H_
+#define PSMALLOC_LIBC_OVERRIDE_H_
 
 
 #include "psmalloc.h"

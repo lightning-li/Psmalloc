@@ -3,8 +3,8 @@
  */
 
 
-#ifndef _PSMALLOC_CORE_CONFIG_H
-#define _PSMALLOC_CORE_CONFIG_H
+#ifndef PSMALLOC_CORE_CONFIG_H_
+#define PSMALLOC_CORE_CONFIG_H_
 
 
 #include <pthread.h>
@@ -25,26 +25,26 @@
 
 /* Each thread has a thread_cache */
 struct thread_cache {
-        struct central_cache *cc;     /* central caches allocated for this thread */
-        struct thread_cache  *next;
+    struct central_cache *cc;     /* central caches allocated for this thread */
+    struct thread_cache  *next;
 };
 
 /* Each central has a central_cache at the beginning */
 struct central_cache {
-        pthread_mutex_t      central_mutex;
-        struct chunk_head    *wait_free_chunk;
-        struct chunk_head    *free_chunk;
-        struct central_cache *used_next;
-        struct central_cache *next;
-        struct thread_cache  *tc;
+    pthread_mutex_t      central_mutex;
+    struct chunk_head    *wait_free_chunk;
+    struct chunk_head    *free_chunk;
+    struct central_cache *used_next;
+    struct central_cache *next;
+    struct thread_cache  *tc;
 };
 
 /* Each chunk has a chunk_head at the beginning */
 struct chunk_head {
-        uint16_t           kind;
-        uint16_t           num;
-        size_t             seek;
-        struct chunk_head *next;
+    uint16_t           kind;
+    uint16_t           num;
+    size_t             seek;
+    struct chunk_head *next;
 };
 
 
@@ -67,11 +67,11 @@ static const size_t num_of_kinds = 5;
 
 /* Size of four kinds of chunk in each thread */
 static const size_t chunk_size[] = {
-        64,          // 64 Bytes
-        256,         // 256 Bytes
-        1024,        // 1 KB
-        1024*4,      // 4 KB
-        1024*16      // 16 KB
+    64,          // 64 Bytes
+    256,         // 256 Bytes
+    1024,        // 1 KB
+    1024*4,      // 4 KB
+    1024*16      // 16 KB
 };
 
 /* Critical size

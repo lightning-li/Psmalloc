@@ -3,8 +3,8 @@
  */
 
 
-#ifndef _PSMALLOC_HEAP_HOOK_H
-#define _PSMALLOC_HEAP_HOOK_H
+#ifndef PSMALLOC_HEAP_HOOK_H_
+#define PSMALLOC_HEAP_HOOK_H_
 
 
 #include "core_config.h"

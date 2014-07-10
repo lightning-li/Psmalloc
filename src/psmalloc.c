@@ -3,13 +3,13 @@
  */
 
 
+#include <unistd.h>           // For getpagesize
+#include <string.h>           // For memset
 #include "psmalloc.h"
 #include "core_config.h"
 #include "heap_hook.h"
 #include "mmap_hook.h"
 #include "libc_override.h"
-#include <unistd.h>           // For getpagesize
-#include <string.h>           // For memset
 
 
 void *do_malloc (size_t size, size_t align)

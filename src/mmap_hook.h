@@ -7,8 +7,8 @@
 #define PSMALLOC_MMAP_HOOK_H_
 
 
-#include "core_config.h"
 #include <stddef.h>        // for size_t
+#include "core_config.h"
 
 
 void *mmap_alloc_hook (size_t size);

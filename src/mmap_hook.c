@@ -3,11 +3,11 @@
  */
 
 
+#include <sys/mman.h>
+#include <string.h>
 #include "mmap_hook.h"
 #include "global_operation.h"
 #include "heap_hook.h"
-#include <sys/mman.h>
-#include <string.h>
 
 
 void *mmap_alloc_hook (size_t size)

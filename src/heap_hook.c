@@ -3,11 +3,11 @@
  */
 
 
-#include "heap_hook.h"
-#include "global_operation.h"
 #include <stdint.h>
 #include <string.h>           // For memcpy
 #include <pthread.h>
+#include "heap_hook.h"
+#include "global_operation.h"
 
 
 uint16_t check_size(size_t size, uint16_t *kind)

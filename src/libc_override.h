@@ -7,8 +7,8 @@
 #define PSMALLOC_LIBC_OVERRIDE_H_
 
 
-#include "psmalloc.h"
 #include <sys/cdefs.h>        // for __THROW
+#include "psmalloc.h"
 
 
 #ifndef __THROW

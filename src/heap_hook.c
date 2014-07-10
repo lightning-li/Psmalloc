@@ -6,11 +6,12 @@
 #include <stdint.h>
 #include <string.h>           // For memcpy
 #include <pthread.h>
+
 #include "heap_hook.h"
 #include "global_operation.h"
 
 
-uint16_t check_size(size_t size, uint16_t *kind)
+static uint16_t check_size(size_t size, uint16_t *kind)
 {
     int index;
     for (index=0; index<num_of_kinds-1; ++index) {
@@ -21,7 +22,8 @@ uint16_t check_size(size_t size, uint16_t *kind)
     return (size+chunk_head_size)/chunk_size[index] + 1;
 }
 
-void *get_appoint_chunk(struct central_cache *cc, size_t tar_size, void *ptr)
+static void *
+get_appoint_chunk(struct central_cache *cc, size_t tar_size, void *ptr)
 {
     struct chunk_head *ch = cc->free_chunk;
     struct chunk_head *prev_ch = ch;
@@ -54,8 +56,9 @@ void *get_appoint_chunk(struct central_cache *cc, size_t tar_size, void *ptr)
     return ch;
 }
 
-void *get_suitable_chunk(struct thread_cache *tc, uint16_t kind, uint16_t num,
-                         size_t align, struct chunk_head *old_ch)
+static void *
+get_suitable_chunk(struct thread_cache *tc, uint16_t kind, uint16_t num,
+                   size_t align, struct chunk_head *old_ch)
 {
     struct chunk_head *ch = NULL;
     struct chunk_head *prev_ch = NULL;

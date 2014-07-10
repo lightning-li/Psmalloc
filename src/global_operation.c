@@ -5,13 +5,13 @@
 
 #include <unistd.h>                // For sbrk, getpagesize
 #include <pthread.h>
+
 #include "global_operation.h"
 
 
 /* =================================================================== */
 /*                Definitions for static variables                     */
 /* =================================================================== */
-
 static struct thread_cache *thread_slab = NULL;
 static struct thread_cache *free_thread = NULL;
 static struct central_cache *used_central = NULL;
@@ -24,7 +24,6 @@ static pthread_once_t once = PTHREAD_ONCE_INIT;
 /* =================================================================== */
 /*                Declaration for static functions                     */
 /* =================================================================== */
-
 static void central_init(struct central_cache *cc);
 static void *get_align_brk(void);
 static void global_add_central (void);
@@ -37,7 +36,6 @@ static void func_before_main(void)  __attribute__((constructor));
 /* =================================================================== */
 /*                Definitions for global operations                    */
 /* =================================================================== */
-
 struct thread_cache *get_current_thread(void)
 {
     pthread_once(&once, init_once);

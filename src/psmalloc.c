@@ -5,6 +5,7 @@
 
 #include <unistd.h>           // For getpagesize
 #include <string.h>           // For memset
+
 #include "psmalloc.h"
 #include "core_config.h"
 #include "heap_hook.h"
@@ -12,7 +13,7 @@
 #include "libc_override.h"
 
 
-void *do_malloc (size_t size, size_t align)
+static void *do_malloc (size_t size, size_t align)
 {
     void *ret = NULL;
 
@@ -28,7 +29,7 @@ void *do_malloc (size_t size, size_t align)
     return ret;
 }
 
-void do_free (void *ptr)
+static void do_free (void *ptr)
 {
     struct central_cache *cc = NULL;
 

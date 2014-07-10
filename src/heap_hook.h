@@ -9,6 +9,7 @@
 
 #include "core_config.h"
 
+
 /* Allocate chunk in central cache */
 void *chunk_alloc_hook (size_t size, size_t align);
 

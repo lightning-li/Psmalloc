@@ -5,6 +5,7 @@
 
 #include <sys/mman.h>
 #include <string.h>
+
 #include "mmap_hook.h"
 #include "global_operation.h"
 #include "heap_hook.h"
@@ -33,7 +34,6 @@ void *mmap_realloc_hook (void *ptr, size_t size)
         
     new_mm = mmap(NULL, size + chunk_head_size, PROT_READ | PROT_WRITE,
                   MAP_PRIVATE | MAP_ANON, -1, 0);
-    // Copy data
     memcpy(new_mm + 1, ptr, old_mm->seek);
         
     // Release old

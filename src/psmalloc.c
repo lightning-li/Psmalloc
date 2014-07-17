@@ -7,7 +7,7 @@
 #include <string.h>           // For memset
 
 #include "psmalloc.h"
-#include "core_config.h"
+#include "crconfig.h"
 #include "heap_hook.h"
 #include "mmap_hook.h"
 #include "libc_override.h"

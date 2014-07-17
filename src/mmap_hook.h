@@ -8,7 +8,7 @@
 
 
 #include <stddef.h>        // for size_t
-#include "core_config.h"
+#include "crconfig.h"
 
 
 void *mmap_alloc_hook (size_t size);

@@ -7,7 +7,7 @@
 #define PSMALLOC_GLOBAL_OPERATION_H_
 
 
-#include "core_config.h"
+#include "crconfig.h"
 
 
 /* Add a central cache for a thread */

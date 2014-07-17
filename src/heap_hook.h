@@ -7,7 +7,7 @@
 #define PSMALLOC_HEAP_HOOK_H_
 
 
-#include "core_config.h"
+#include "crconfig.h"
 
 
 /* Allocate chunk in central cache */

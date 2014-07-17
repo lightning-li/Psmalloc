@@ -3,8 +3,8 @@
  */
 
 
-#ifndef PSMALLOC_CORE_CONFIG_H_
-#define PSMALLOC_CORE_CONFIG_H_
+#ifndef PSMALLOC_CRCONFIG_H_
+#define PSMALLOC_CRCONFIG_H_
 
 
 #include <pthread.h>

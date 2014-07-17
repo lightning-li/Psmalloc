@@ -9,7 +9,7 @@
 
 #include <sys/cdefs.h>        // for __THROW
 #include <stddef.h>           // for size_t
-#include "core_config.h"
+#include "crconfig.h"
 
 
 #ifndef __THROW

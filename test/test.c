@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <time.h>
-#ifndef __UNIX__
+#ifndef __unix__
 #include <malloc.h>
 #endif
 

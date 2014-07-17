@@ -7,7 +7,9 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <time.h>
+#ifndef __UNIX__
 #include <malloc.h>
+#endif
 
 
 void func(void)

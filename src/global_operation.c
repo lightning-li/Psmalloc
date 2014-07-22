@@ -17,7 +17,7 @@ static struct thread_cache *free_thread = NULL;
 static struct central_cache *used_central = NULL;
 static struct central_cache *free_central = NULL;
 static pthread_key_t tkey;
-static pthread_mutex_t mutex;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_once_t once = PTHREAD_ONCE_INIT;
 
 
@@ -225,16 +225,13 @@ static struct thread_cache *thread_init(void)
 
 static void init_once(void)
 {
-    /* Initialize mutex, tkey */
-    pthread_mutex_init(&mutex, NULL);
     pthread_key_create(&tkey, &thread_destructor);
     /* Allocate for struct thread_cache */
     thread_slab  = sbrk(thread_slab_size);
 
     /* Initialize global central cache
-       and allocate for main thread*/
+       and allocate for main thread */
     global_add_central();
-    thread_init();
 }
 
 static void func_before_main(void)

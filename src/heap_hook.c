@@ -174,9 +174,9 @@ void do_chunk_free(struct central_cache *cc, struct chunk_head *ch)
 {
     struct chunk_head *prev_ch = NULL;
     struct chunk_head *next_ch = NULL;
+    size_t check;
 
     pthread_mutex_lock(&cc->central_mutex);                  // Lock
-
     /* If this thread is not the owner of this cc */
     if (cc->tc!=NULL && get_current_thread() != cc->tc) {
         ch->next = cc->wait_free_chunk;
@@ -198,18 +198,24 @@ void do_chunk_free(struct central_cache *cc, struct chunk_head *ch)
 
         /* Check arround target chunk */
         if (next_ch == cc->free_chunk) {
+            check = 1;
             cc->free_chunk = ch;
         } else {
-            if ((size_t)ch-(size_t)prev_ch == prev_ch->seek) {
+            check = (size_t)ch - (size_t)prev_ch;
+            if (check > prev_ch->seek) {
+                check = 2;
+                ch->next = prev_ch->next;
+                prev_ch->next = ch;
+            } else if (check == prev_ch->seek) {
+                check = 3;
                 prev_ch->seek +=  ch->seek;
                 ch = prev_ch;
             } else {
-                ch->next = prev_ch->next;
-                prev_ch->next = ch;
+                check = 0;
             }
         }
                 
-        if (next_ch != NULL) {
+        if (next_ch != NULL && check > 0) {
             if ((size_t)next_ch-(size_t)ch == ch->seek) {
                 ch->seek += next_ch->seek;
                 ch->next = next_ch->next;

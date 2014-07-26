@@ -2,11 +2,10 @@
  * Copyright (C) 2014 FillZpp
  */
 
+#include "global_operation.h"
 
 #include <unistd.h>                // For sbrk, getpagesize
 #include <pthread.h>
-
-#include "global_operation.h"
 
 
 /* =================================================================== */

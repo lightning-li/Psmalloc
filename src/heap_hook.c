@@ -3,11 +3,12 @@
  */
 
 
+#include "heap_hook.h"
+
 #include <stdint.h>
 #include <string.h>           // For memcpy
 #include <pthread.h>
 
-#include "heap_hook.h"
 #include "global_operation.h"
 
 
